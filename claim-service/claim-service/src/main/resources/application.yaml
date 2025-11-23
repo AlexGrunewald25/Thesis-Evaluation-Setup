@@ -10,11 +10,21 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update   # für lokale Entwicklung ok, für Produktion später anders
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
+
+  kafka:
+    bootstrap-servers: claims-kafka:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    template:
+      default-topic: claims.claim-events
 
 server:
   port: 8080
@@ -24,7 +34,17 @@ management:
     web:
       exposure:
         include: health,info,metrics,prometheus
+
   metrics:
-    export:
-      prometheus:
-        enabled: true
+    distribution:
+      percentiles-histogram:
+        claims.rest.latency: true
+        claims.grpc.latency: true
+        claims.kafka.producer.latency: true
+        claims.service.operation.duration: true
+
+      percentiles:
+        claims.rest.latency: 0.5, 0.95, 0.99
+        claims.grpc.latency: 0.5, 0.95, 0.99
+        claims.kafka.producer.latency: 0.5, 0.95, 0.99
+        claims.service.operation.duration: 0.5, 0.95, 0.99

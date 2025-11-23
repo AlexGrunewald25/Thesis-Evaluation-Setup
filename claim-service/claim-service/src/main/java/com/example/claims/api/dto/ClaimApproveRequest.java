@@ -4,12 +4,14 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
-public class ApproveClaimRequest {
+public class ClaimApproveRequest {
 
     @NotNull
     @Min(0)
-    private Double approvedAmount;
+    private BigDecimal approvedAmount;
 
     private String reason;
 }

@@ -1,0 +1,198 @@
+{
+  "info": {
+    "name": "Claims Service - gRPC",
+    "_postman_id": "11111111-2222-3333-4444-555555555555",
+    "description": "gRPC requests for the ClaimsService (SubmitClaim, GetClaim, ListClaimsForCustomer, ApproveClaim, RejectClaim, MarkClaimPaidOut).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "gRPC – SubmitClaim",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"policyId\": \"11111111-1111-1111-1111-111111111111\",\n  \"customerId\": \"{{customerId}}\",\n  \"description\": \"Sturmschaden am Dach (gRPC)\",\n  \"reportedAmount\": 4200.0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{grpcBaseUrl}}",
+          "host": [
+            "{{grpcBaseUrl}}"
+          ]
+        },
+        "description": "gRPC SubmitClaim call for ClaimsService. In Postman: switch type to gRPC, set server URL to {{grpcBaseUrl}}, method to claims.ClaimsService/SubmitClaim, and paste this JSON into the Message body."
+      },
+      "response": []
+    },
+    {
+      "name": "gRPC – GetClaim",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"claimId\": \"{{claimId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{grpcBaseUrl}}",
+          "host": [
+            "{{grpcBaseUrl}}"
+          ]
+        },
+        "description": "gRPC GetClaim call. In Postman: type = gRPC, method = claims.ClaimsService/GetClaim, Message = this JSON. claimId is taken from a previous response."
+      },
+      "response": []
+    },
+    {
+      "name": "gRPC – ListClaimsForCustomer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customerId\": \"{{customerId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{grpcBaseUrl}}",
+          "host": [
+            "{{grpcBaseUrl}}"
+          ]
+        },
+        "description": "gRPC ListClaimsForCustomer call. In Postman: type = gRPC, method = claims.ClaimsService/ListClaimsForCustomer."
+      },
+      "response": []
+    },
+    {
+      "name": "gRPC – ApproveClaim",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"claimId\": \"{{claimId}}\",\n  \"approvedAmount\": 3000.0,\n  \"reason\": \"Teilregulierung nach Gutachten\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{grpcBaseUrl}}",
+          "host": [
+            "{{grpcBaseUrl}}"
+          ]
+        },
+        "description": "gRPC ApproveClaim call. In Postman: type = gRPC, method = claims.ClaimsService/ApproveClaim."
+      },
+      "response": []
+    },
+    {
+      "name": "gRPC – RejectClaim",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"claimId\": \"{{claimId}}\",\n  \"reason\": \"Schaden nicht gedeckt laut Bedingungen\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{grpcBaseUrl}}",
+          "host": [
+            "{{grpcBaseUrl}}"
+          ]
+        },
+        "description": "gRPC RejectClaim call. In Postman: type = gRPC, method = claims.ClaimsService/RejectClaim."
+      },
+      "response": []
+    },
+    {
+      "name": "gRPC – MarkClaimPaidOut",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"claimId\": \"{{claimId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{grpcBaseUrl}}",
+          "host": [
+            "{{grpcBaseUrl}}"
+          ]
+        },
+        "description": "gRPC MarkClaimPaidOut call. In Postman: type = gRPC, method = claims.ClaimsService/MarkClaimPaidOut."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "grpcBaseUrl",
+      "value": "localhost:9090"
+    },
+    {
+      "key": "claimId",
+      "value": ""
+    },
+    {
+      "key": "customerId",
+      "value": "22222222-2222-2222-2222-222222222222"
+    }
+  ]
+}

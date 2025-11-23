@@ -1,6 +1,6 @@
 {
     "info": {
-      "name": "Claims Service",
+      "name": "Claims Service - REST",
       "_postman_id": "b3f32d5e-8d7b-4c3c-9a5b-123456789abc",
       "description": "REST-API-Tests für den Claims-Service",
       "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"

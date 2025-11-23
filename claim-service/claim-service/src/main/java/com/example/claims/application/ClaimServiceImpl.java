@@ -1,107 +1,183 @@
 package com.example.claims.application;
 
 import com.example.claims.domain.Claim;
+import com.example.claims.domain.ClaimStatus;
+import com.example.claims.infrastructure.messaging.ClaimEventsProducer;
 import com.example.claims.infrastructure.persistence.ClaimEntity;
 import com.example.claims.infrastructure.persistence.ClaimEntityMapper;
 import com.example.claims.infrastructure.persistence.ClaimJpaRepository;
 import com.example.claims.support.error.ClaimNotFoundException;
+import com.example.claims.support.error.InvalidClaimStateException;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
+@Transactional
 public class ClaimServiceImpl implements ClaimService {
 
-    private final ClaimJpaRepository claimJpaRepository;
+    private final ClaimJpaRepository claimRepository;
+    private final ClaimEntityMapper claimEntityMapper;
+    private final ClaimEventsProducer claimEventsProducer;
+    private final MeterRegistry meterRegistry;
+
+    // Helper: Timer für eine Operation mit Tag "operation"
+    private Timer timer(String operation) {
+        return Timer.builder("claims_service_operation_duration")
+                .description("Duration of claim service operations")
+                .tag("operation", operation)
+                .publishPercentileHistogram(true)
+                .publishPercentiles(0.5, 0.95, 0.99)
+                .register(meterRegistry);
+    }
+
+    // Helper: Counter für eine Operation mit Tag "operation"
+    private void incrementCounter(String operation) {
+        meterRegistry.counter("claims_service_operation_total",
+                        "operation", operation)
+                .increment();
+    }
 
     @Override
     public Claim submitClaim(UUID policyId,
                              UUID customerId,
                              String description,
-                             double reportedAmount) {
+                             BigDecimal reportedAmount) {
 
-        OffsetDateTime now = OffsetDateTime.now();
+        return timer("submit").record(() -> {
+            incrementCounter("submit");
 
-        Claim claim = Claim.newSubmittedClaim(
-                policyId,
-                customerId,
-                description,
-                reportedAmount,
-                now
-        );
+            var now = OffsetDateTime.now();
 
-        ClaimEntity saved = claimJpaRepository.save(ClaimEntityMapper.toEntity(claim));
-        return ClaimEntityMapper.toDomain(saved);
+            Claim claim = Claim.builder()
+                    .id(UUID.randomUUID())
+                    .policyId(policyId)
+                    .customerId(customerId)
+                    .description(description)
+                    .reportedAmount(reportedAmount)
+                    .status(ClaimStatus.SUBMITTED)
+                    .approved(false)
+                    .approvedAmount(null)
+                    .decisionReason(null)
+                    .createdAt(now)
+                    .lastUpdatedAt(now)
+                    .build();
+
+            ClaimEntity entity = claimEntityMapper.toEntity(claim);
+            ClaimEntity saved = claimRepository.save(entity);
+
+            Claim result = claimEntityMapper.toDomain(saved);
+            claimEventsProducer.publishClaimSubmitted(result);
+            return result;
+        });
+    }
+
+    @Override
+    public Claim startReview(UUID claimId) {
+        return timer("startReview").record(() -> {
+            incrementCounter("startReview");
+
+            ClaimEntity entity = claimRepository.findById(claimId)
+                    .orElseThrow(() -> new ClaimNotFoundException(claimId));
+
+            Claim domain = claimEntityMapper.toDomain(entity);
+            domain.startReview();
+
+            ClaimEntity updated = claimEntityMapper.toEntity(domain);
+            updated = claimRepository.save(updated);
+
+            Claim result = claimEntityMapper.toDomain(updated);
+
+            claimEventsProducer.publishClaimInReview(result);
+            return result;
+        });
+    }
+
+    @Override
+    public Claim approveClaim(UUID claimId, BigDecimal approvedAmount, String decisionReason) {
+        return timer("approve").record(() -> {
+            incrementCounter("approve");
+
+            ClaimEntity entity = claimRepository.findById(claimId)
+                    .orElseThrow(() -> new ClaimNotFoundException(claimId));
+
+            Claim domain = claimEntityMapper.toDomain(entity);
+            domain.approve(approvedAmount, decisionReason);
+
+            ClaimEntity updated = claimEntityMapper.toEntity(domain);
+            updated = claimRepository.save(updated);
+
+            Claim result = claimEntityMapper.toDomain(updated);
+            claimEventsProducer.publishClaimApproved(result);
+            return result;
+        });
+    }
+
+    @Override
+    public Claim rejectClaim(UUID claimId, String decisionReason) {
+        return timer("reject").record(() -> {
+            incrementCounter("reject");
+
+            ClaimEntity entity = claimRepository.findById(claimId)
+                    .orElseThrow(() -> new ClaimNotFoundException(claimId));
+
+            Claim domain = claimEntityMapper.toDomain(entity);
+            domain.reject(decisionReason);
+
+            ClaimEntity updated = claimEntityMapper.toEntity(domain);
+            updated = claimRepository.save(updated);
+
+            Claim result = claimEntityMapper.toDomain(updated);
+            claimEventsProducer.publishClaimRejected(result);
+            return result;
+        });
+    }
+
+    @Override
+    public Claim payoutClaim(UUID claimId) {
+        return timer("payout").record(() -> {
+            incrementCounter("payout");
+
+            ClaimEntity entity = claimRepository.findById(claimId)
+                    .orElseThrow(() -> new ClaimNotFoundException(claimId));
+
+            Claim domain = claimEntityMapper.toDomain(entity);
+            domain.payout();
+
+            ClaimEntity updated = claimEntityMapper.toEntity(domain);
+            updated = claimRepository.save(updated);
+
+            Claim result = claimEntityMapper.toDomain(updated);
+            claimEventsProducer.publishClaimPaidOut(result);
+            return result;
+        });
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Claim getClaim(UUID claimId) {
-        return claimJpaRepository.findById(claimId)
-                .map(ClaimEntityMapper::toDomain)
+    public Claim getClaimById(UUID claimId) {
+        incrementCounter("getById");
+
+        return claimRepository.findById(claimId)
+                .map(claimEntityMapper::toDomain)
                 .orElseThrow(() -> new ClaimNotFoundException(claimId));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Claim> getClaimsForCustomer(UUID customerId) {
-        return claimJpaRepository.findByCustomerId(customerId)
-                .stream()
-                .map(ClaimEntityMapper::toDomain)
+        incrementCounter("getForCustomer");
+
+        return claimRepository.findByCustomerId(customerId).stream()
+                .map(claimEntityMapper::toDomain)
                 .toList();
-    }
-
-    @Override
-    public Claim approveClaim(UUID claimId,
-                              double approvedAmount,
-                              String reason) {
-
-        OffsetDateTime now = OffsetDateTime.now();
-
-        ClaimEntity entity = claimJpaRepository.findById(claimId)
-                .orElseThrow(() -> new ClaimNotFoundException(claimId));
-
-        Claim claim = ClaimEntityMapper.toDomain(entity);
-        claim.approve(approvedAmount, reason, now);
-
-        ClaimEntity updated = claimJpaRepository.save(ClaimEntityMapper.toEntity(claim));
-        return ClaimEntityMapper.toDomain(updated);
-    }
-
-    @Override
-    public Claim rejectClaim(UUID claimId,
-                             String reason) {
-
-        OffsetDateTime now = OffsetDateTime.now();
-
-        ClaimEntity entity = claimJpaRepository.findById(claimId)
-                .orElseThrow(() -> new ClaimNotFoundException(claimId));
-
-        Claim claim = ClaimEntityMapper.toDomain(entity);
-        claim.reject(reason, now);
-
-        ClaimEntity updated = claimJpaRepository.save(ClaimEntityMapper.toEntity(claim));
-        return ClaimEntityMapper.toDomain(updated);
-    }
-
-    @Override
-    public Claim markAsPaidOut(UUID claimId) {
-
-        OffsetDateTime now = OffsetDateTime.now();
-
-        ClaimEntity entity = claimJpaRepository.findById(claimId)
-                .orElseThrow(() -> new ClaimNotFoundException(claimId));
-
-        Claim claim = ClaimEntityMapper.toDomain(entity);
-        claim.markPaidOut(now);
-
-        ClaimEntity updated = claimJpaRepository.save(ClaimEntityMapper.toEntity(claim));
-        return ClaimEntityMapper.toDomain(updated);
     }
 }

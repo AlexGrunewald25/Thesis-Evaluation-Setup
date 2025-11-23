@@ -1,0 +1,117 @@
+syntax = "proto3";
+
+package claims;
+
+// Java-spezifische Optionen
+option java_multiple_files = true;
+option java_package = "com.example.claims.grpc";
+option java_outer_classname = "ClaimsProto";
+
+import "google/protobuf/timestamp.proto";
+
+// Enum für Status – analog zu ClaimStatus in der Domain
+enum ClaimStatus {
+  CLAIM_STATUS_UNSPECIFIED = 0;
+  CLAIM_STATUS_SUBMITTED   = 1;
+  CLAIM_STATUS_IN_REVIEW   = 2;
+  CLAIM_STATUS_APPROVED    = 3;
+  CLAIM_STATUS_REJECTED    = 4;
+  CLAIM_STATUS_PAID_OUT    = 5;
+}
+
+// Nachricht für einen Claim
+message Claim {
+  string id            = 1;
+  string policyId      = 2;
+  string customerId    = 3;
+
+  string description   = 4;
+  double reportedAmount = 5;
+
+  ClaimStatus status   = 6;
+
+  bool approved        = 7;
+  double approvedAmount = 8;
+  string decisionReason = 9;
+
+  google.protobuf.Timestamp createdAt    = 10;
+  google.protobuf.Timestamp lastUpdatedAt = 11;
+}
+
+// Requests/Responses
+
+message SubmitClaimRequest {
+  string policyId      = 1;
+  string customerId    = 2;
+  string description   = 3;
+  double reportedAmount = 4;
+}
+
+message SubmitClaimResponse {
+  Claim claim = 1;
+}
+
+message GetClaimRequest {
+  string claimId = 1;
+}
+
+message GetClaimResponse {
+  Claim claim = 1;
+}
+
+message ListClaimsForCustomerRequest {
+  string customerId = 1;
+}
+
+message ListClaimsForCustomerResponse {
+  repeated Claim claims = 1;
+}
+
+message ApproveClaimRequest {
+  string claimId       = 1;
+  double approvedAmount = 2;
+  string reason        = 3;
+}
+
+message ApproveClaimResponse {
+  Claim claim = 1;
+}
+
+message RejectClaimRequest {
+  string claimId = 1;
+  string reason  = 2;
+}
+
+message RejectClaimResponse {
+  Claim claim = 1;
+}
+
+message MarkClaimPaidOutRequest {
+  string claimId = 1;
+}
+
+message MarkClaimPaidOutResponse {
+  Claim claim = 1;
+}
+
+// gRPC-Service-Schnittstelle
+message StartReviewRequest {
+  string claimId = 1;
+}
+
+message StartReviewResponse {
+  Claim claim = 1;
+}
+
+service ClaimsService {
+  rpc SubmitClaim(SubmitClaimRequest) returns (SubmitClaimResponse);
+  rpc GetClaim(GetClaimRequest) returns (GetClaimResponse);
+  rpc ListClaimsForCustomer(ListClaimsForCustomerRequest) returns (ListClaimsForCustomerResponse);
+  rpc ApproveClaim(ApproveClaimRequest) returns (ApproveClaimResponse);
+  rpc RejectClaim(RejectClaimRequest) returns (RejectClaimResponse);
+  rpc MarkClaimPaidOut(MarkClaimPaidOutRequest) returns (MarkClaimPaidOutResponse);
+
+  // NEU:
+  rpc StartReview(StartReviewRequest) returns (StartReviewResponse);
+}
+

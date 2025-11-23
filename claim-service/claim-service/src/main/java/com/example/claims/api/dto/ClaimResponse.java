@@ -4,6 +4,7 @@ import com.example.claims.domain.ClaimStatus;
 import lombok.Builder;
 import lombok.Value;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
