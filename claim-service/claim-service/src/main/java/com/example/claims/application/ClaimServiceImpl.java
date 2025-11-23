@@ -2,7 +2,7 @@ package com.example.claims.application;
 
 import com.example.claims.domain.Claim;
 import com.example.claims.domain.ClaimStatus;
-import com.example.claims.infrastructure.messaging.ClaimEventsProducer;
+import com.example.claims.application.ClaimIntegrationService;
 import com.example.claims.infrastructure.persistence.ClaimEntity;
 import com.example.claims.infrastructure.persistence.ClaimEntityMapper;
 import com.example.claims.infrastructure.persistence.ClaimJpaRepository;
@@ -26,7 +26,7 @@ public class ClaimServiceImpl implements ClaimService {
 
     private final ClaimJpaRepository claimRepository;
     private final ClaimEntityMapper claimEntityMapper;
-    private final ClaimEventsProducer claimEventsProducer;
+    private final ClaimIntegrationService claimIntegrationService;
     private final MeterRegistry meterRegistry;
 
     // Helper: Timer für eine Operation mit Tag "operation"
@@ -75,7 +75,7 @@ public class ClaimServiceImpl implements ClaimService {
             ClaimEntity saved = claimRepository.save(entity);
 
             Claim result = claimEntityMapper.toDomain(saved);
-            claimEventsProducer.publishClaimSubmitted(result);
+            claimIntegrationService.onClaimSubmitted(result);
             return result;
         });
     }
@@ -96,7 +96,7 @@ public class ClaimServiceImpl implements ClaimService {
 
             Claim result = claimEntityMapper.toDomain(updated);
 
-            claimEventsProducer.publishClaimInReview(result);
+            claimIntegrationService.onClaimInReview(result);
             return result;
         });
     }
@@ -116,7 +116,7 @@ public class ClaimServiceImpl implements ClaimService {
             updated = claimRepository.save(updated);
 
             Claim result = claimEntityMapper.toDomain(updated);
-            claimEventsProducer.publishClaimApproved(result);
+            claimIntegrationService.onClaimApproved(result);
             return result;
         });
     }
@@ -136,7 +136,7 @@ public class ClaimServiceImpl implements ClaimService {
             updated = claimRepository.save(updated);
 
             Claim result = claimEntityMapper.toDomain(updated);
-            claimEventsProducer.publishClaimRejected(result);
+            claimIntegrationService.onClaimRejected(result);
             return result;
         });
     }
@@ -156,7 +156,7 @@ public class ClaimServiceImpl implements ClaimService {
             updated = claimRepository.save(updated);
 
             Claim result = claimEntityMapper.toDomain(updated);
-            claimEventsProducer.publishClaimPaidOut(result);
+            claimIntegrationService.onClaimPaidOut(result);
             return result;
         });
     }

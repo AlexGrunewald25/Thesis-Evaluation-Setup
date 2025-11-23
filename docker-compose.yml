@@ -111,6 +111,30 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
 
+  k6-breakpoint:
+    image: grafana/k6:latest
+    container_name: claims-k6-breakpoint
+    profiles: ["loadtest"]
+    depends_on:
+      - prometheus
+    volumes:
+      - ./loadtests:/scripts
+      - ./claim-service/claim-service/src/main/proto:/proto
+    entrypoint: [ "k6", "run", "/scripts/claim_breakpoint.js" ]
+
+  k6-constant:
+    image: grafana/k6:latest
+    container_name: claims-k6-constant
+    profiles: ["loadtest"]
+    depends_on:
+      - prometheus
+    volumes:
+      - ./loadtests:/scripts
+      - ./claim-service/claim-service/src/main/proto:/proto
+    entrypoint: [ "k6", "run", "/scripts/claim_constant_load.js" ]
+
+
+
 
 volumes:
   claims-postgres-data:
