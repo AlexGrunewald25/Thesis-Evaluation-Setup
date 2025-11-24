@@ -42,18 +42,14 @@ services:
     container_name: claims-postgres
     restart: always
     environment:
-      POSTGRES_DB: claimsdb
-      POSTGRES_USER: claims_user
-      POSTGRES_PASSWORD: claims_password
+      # Basis-User, den das Image zum Start braucht
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     volumes:
-      - claims-postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U claims_user -d claimsdb"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d
 
   prometheus:
     image: prom/prometheus:latest
@@ -137,4 +133,4 @@ services:
 
 
 volumes:
-  claims-postgres-data:
+  postgres-data:

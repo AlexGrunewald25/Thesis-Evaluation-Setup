@@ -7,14 +7,12 @@ spring:
     username: claims_user
     password: claims_password
     driver-class-name: org.postgresql.Driver
-
   jpa:
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
 
   kafka:
     bootstrap-servers: claims-kafka:9092
