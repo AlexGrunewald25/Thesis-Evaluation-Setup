@@ -26,7 +26,7 @@ spring:
 
 policies:
   events:
-    evaluation-topic-name: policy-evaluation-results
+    evaluation-topic-name: policies.policy-evaluation-events
 
 management:
   endpoints:
