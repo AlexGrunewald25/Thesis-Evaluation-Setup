@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package customers;
+
+// Java-spezifische Optionen, analog zu claims.proto / policy.proto
+option java_multiple_files = true;
+option java_package = "com.example.customers.grpc";
+option java_outer_classname = "CustomersProto";
+
+// Anfrage zum Laden eines Kunden
+message GetCustomerRequest {
+  string customer_number = 1;
+}
+
+// Protobuf-Repräsentation eines Kunden
+message Customer {
+  string id = 1;
+  string customer_number = 2;
+  string first_name = 3;
+  string last_name = 4;
+
+  string street = 5;
+  string postal_code = 6;
+  string city = 7;
+
+  string email = 8;
+  string phone_number = 9;
+
+  bool address_complete = 10;
+  bool contact_data_complete = 11;
+}
+
+// Antwort auf GetCustomer
+message GetCustomerResponse {
+  Customer customer = 1;
+}
+
+// Anfrage zur Validierung von Kundendaten
+message CustomerValidationRequest {
+  string customer_number = 1;
+}
+
+// Antwort auf Validierung
+message CustomerValidationResponse {
+  bool valid = 1;
+}
+
+// gRPC-Service für Kundendaten
+service CustomerService {
+  rpc GetCustomer(GetCustomerRequest) returns (GetCustomerResponse);
+  rpc IsCustomerDataValid(CustomerValidationRequest) returns (CustomerValidationResponse);
+}

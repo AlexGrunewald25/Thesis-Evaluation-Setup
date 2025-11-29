@@ -13,6 +13,7 @@ import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
+import org.springframework.context.annotation.Profile;
 
 import java.util.UUID;
 
@@ -23,6 +24,7 @@ import java.util.UUID;
 @Slf4j
 @GrpcService
 @RequiredArgsConstructor
+@Profile("grpc")
 public class PolicyGrpcService extends PolicyServiceGrpc.PolicyServiceImplBase {
 
     private final com.example.policies.application.PolicyService policyService;

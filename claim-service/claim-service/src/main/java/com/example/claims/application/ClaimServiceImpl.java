@@ -10,8 +10,10 @@ import com.example.claims.infrastructure.policy.PolicyClient;
 import com.example.claims.support.error.ClaimNotFoundException;
 import com.example.claims.support.error.InvalidClaimStateException;
 import io.micrometer.core.instrument.MeterRegistry;
+import com.example.claims.infrastructure.customer.CustomerClient;
 import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class ClaimServiceImpl implements ClaimService {
 
     private final ClaimJpaRepository claimRepository;
@@ -30,6 +33,7 @@ public class ClaimServiceImpl implements ClaimService {
     private final ClaimIntegrationService claimIntegrationService;
     private final MeterRegistry meterRegistry;
     private final PolicyClient policyClient;
+    private final CustomerClient customerClient;
 
     // Helper: Timer für eine Operation mit Tag "operation"
     private Timer timer(String operation) {
@@ -48,6 +52,18 @@ public class ClaimServiceImpl implements ClaimService {
                 .increment();
     }
 
+    private void incrementPolicyLookupCounter(String outcome) {
+        meterRegistry.counter("claims_policy_lookup_total",
+                        "outcome", outcome)
+                .increment();
+    }
+
+    private void incrementCustomerValidationCounter(String outcome) {
+        meterRegistry.counter("claims_customer_validation_total",
+                        "outcome", outcome)
+                .increment();
+    }
+
     @Override
     public Claim submitClaim(UUID policyId,
                              UUID customerId,
@@ -57,20 +73,42 @@ public class ClaimServiceImpl implements ClaimService {
         return timer("submit").record(() -> {
             incrementCounter("submit");
 
-            // Policy-Lookup über PolicyService -----------------------
+            // -----------------------------------------------------------------
+            // 1) Policy-Lookup über PolicyService
+            // -----------------------------------------------------------------
+            log.info("ClaimServiceImpl.submitClaim: calling PolicyService for policyId={}", policyId);
+
             policyClient.getPolicyById(policyId)
                     .ifPresentOrElse(
-                            policy -> meterRegistry.counter(
-                                            "claims_policy_lookup_total",
-                                            "outcome", "found")
-                                    .increment(),
-                            () -> meterRegistry.counter(
-                                            "claims_policy_lookup_total",
-                                            "outcome", "not_found")
-                                    .increment()
+                            policy -> {
+                                incrementPolicyLookupCounter("found");
+                                log.info("PolicyService returned policy {} for policyId={}",
+                                        policy.policyNumber(), policyId);
+                            },
+                            () -> {
+                                incrementPolicyLookupCounter("not_found");
+                                log.warn("PolicyService did not return a policy for policyId={}", policyId);
+                            }
                     );
-            // -----------------------------------------------------------------
 
+            // -----------------------------------------------------------------
+            // 2) Customer-Validierung über CustomerService
+            // -----------------------------------------------------------------
+            log.info("ClaimServiceImpl.submitClaim: calling CustomerService for customerId={}", customerId);
+
+            boolean customerValid = customerClient.isCustomerDataValid(customerId);
+
+            if (customerValid) {
+                incrementCustomerValidationCounter("valid");
+                log.info("CustomerService reports valid customer data for customerId={}", customerId);
+            } else {
+                incrementCustomerValidationCounter("invalid_or_not_found");
+                log.warn("CustomerService reports invalid or missing customer data for customerId={}", customerId);
+            }
+
+            // -----------------------------------------------------------------
+            // 3) Claim-Domainobjekt erzeugen und speichern
+            // -----------------------------------------------------------------
             var now = OffsetDateTime.now();
 
             Claim claim = Claim.builder()
@@ -91,7 +129,10 @@ public class ClaimServiceImpl implements ClaimService {
             ClaimEntity saved = claimRepository.save(entity);
 
             Claim result = claimEntityMapper.toDomain(saved);
+
+            // event-driven Integration (Kafka) oder No-Op – je nach Profil
             claimIntegrationService.onClaimSubmitted(result);
+
             return result;
         });
     }

@@ -9,6 +9,7 @@ import io.micrometer.core.instrument.Timer;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ import java.util.UUID;
 @RequestMapping("/policies")
 @RequiredArgsConstructor
 @Slf4j
+@Profile("rest")
 public class PolicyRestController {
 
     private final PolicyService policyService;

@@ -14,7 +14,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@Profile("rest-sync")
+@Profile("rest")
 public class RestPolicyClient implements PolicyClient {
 
     private final RestTemplate policyRestTemplate;
@@ -30,22 +30,29 @@ public class RestPolicyClient implements PolicyClient {
         String url = baseUrl + "/policies/" + policyId;
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("X-Service-Name", applicationName);
+        headers.add("X-Caller-Service", applicationName);
+
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
         try {
+            log.info("RestPolicyClient.getPolicyById({}) called, url={}", policyId, url);
+
             ResponseEntity<PolicySummary> response =
                     policyRestTemplate.exchange(url, HttpMethod.GET, requestEntity, PolicySummary.class);
-            log.info("RestPolicyClient.getPolicyById({}) called", policyId);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                return Optional.of(response.getBody());
+                PolicySummary summary = response.getBody();
+                log.info("PolicyService returned policyNumber={} for policyId={}",
+                        summary.policyNumber(), policyId);
+                return Optional.of(summary);
             }
 
-            log.warn("Policy {} not found, status={}", policyId, response.getStatusCode());
+            log.warn("PolicyService returned status={} for policyId={}",
+                    response.getStatusCode(), policyId);
             return Optional.empty();
+
         } catch (Exception ex) {
-            log.error("Error calling PolicyService for id {}: {}", policyId, ex.getMessage());
+            log.error("Error calling PolicyService (REST) for policyId {}: {}", policyId, ex.getMessage(), ex);
             return Optional.empty();
         }
     }

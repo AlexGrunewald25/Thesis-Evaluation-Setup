@@ -1,0 +1,54 @@
+server:
+  port: 8083
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/customerdb
+    username: customer_user
+    password: customer_password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  sql:
+    init:
+      mode: always
+
+  kafka:
+    bootstrap-servers: claims-kafka:9092
+    consumer:
+      group-id: customer-service
+
+customers:
+  events:
+    validation-topic-name: customers.customer-validation-events
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+  metrics:
+    distribution:
+      percentiles-histogram:
+        customers.rest.latency: true
+        customers.grpc.latency: true
+        customers.kafka.consumer.latency: true
+        customers.events.publish.latency: true
+
+      percentiles:
+        customers.rest.latency: 0.5, 0.95, 0.99
+        customers.grpc.latency: 0.5, 0.95, 0.99
+        customers.kafka.consumer.latency: 0.5, 0.95, 0.99
+        customers.events.publish.latency: 0.5, 0.95, 0.99
+
+grpc:
+  server:
+    port: 9192

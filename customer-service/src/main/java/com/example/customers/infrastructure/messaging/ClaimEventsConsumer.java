@@ -1,9 +1,9 @@
-package com.example.policies.infrastructure.messaging;
+package com.example.customers.infrastructure.messaging;
 
-import com.example.policies.application.PolicyService;
-import com.example.policies.domain.Policy;
-import com.example.policies.messaging.events.ClaimEventPayload;
-import com.example.policies.messaging.events.ClaimEventType;
+import com.example.customers.application.CustomerService;
+import com.example.customers.domain.Customer;
+import com.example.customers.messaging.events.ClaimEventPayload;
+import com.example.customers.messaging.events.ClaimEventType;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -22,8 +22,8 @@ import java.util.Optional;
 @Profile("event-driven")
 public class ClaimEventsConsumer {
 
-    private final PolicyService policyService;
-    private final PolicyEvaluationResultProducer evaluationResultProducer;
+    private final CustomerService customerService;
+    private final CustomerValidationResultProducer validationResultProducer;
     private final MeterRegistry meterRegistry;
 
     private Timer.Sample startSample() {
@@ -32,8 +32,8 @@ public class ClaimEventsConsumer {
 
     private void stopSample(Timer.Sample sample, String outcome, String eventType) {
         sample.stop(
-                Timer.builder("policies.kafka.consumer.latency")
-                        .description("Kafka consumer latency for claim events in policy-service")
+                Timer.builder("customers.kafka.consumer.latency")
+                        .description("Kafka consumer latency for claim events in customer-service")
                         .tag("event_type", eventType)
                         .tag("outcome", outcome)
                         .publishPercentileHistogram(true)
@@ -43,8 +43,8 @@ public class ClaimEventsConsumer {
     }
 
     private void incrementCounter(String outcome, String eventType) {
-        Counter.builder("policies.kafka.consumer.events")
-                .description("Number of claim events processed in policy-service")
+        Counter.builder("customers.kafka.consumer.events")
+                .description("Number of claim events processed in customer-service")
                 .tag("event_type", eventType)
                 .tag("outcome", outcome)
                 .register(meterRegistry)
@@ -53,20 +53,19 @@ public class ClaimEventsConsumer {
 
     @KafkaListener(
             topics = "claims.claim-events",
-            groupId = "policy-service"
+            groupId = "customer-service"
     )
     public void onClaimEvent(ClaimEventPayload event) {
-
         String eventTypeName = event.getEventType() != null
                 ? event.getEventType().name()
                 : "UNKNOWN";
 
-        Timer.Sample sample = startSample();
+        Timer.Sample sample = Timer.start(meterRegistry);
         String outcome = "success";
 
         try {
-            log.info("PolicyService received ClaimEvent: eventType={}, claimId={}, policyId={}",
-                    eventTypeName, event.getClaimId(), event.getPolicyId());
+            log.info("CustomerService received ClaimEvent: eventType={}, claimId={}, customerId={}, customerNumber={}",
+                    eventTypeName, event.getClaimId(), event.getCustomerId(), event.getCustomerNumber());
 
             if (event.getEventType() != ClaimEventType.CLAIM_SUBMITTED) {
                 outcome = "ignored";
@@ -74,18 +73,26 @@ public class ClaimEventsConsumer {
                 return;
             }
 
-            Optional<Policy> policyOpt = Optional.empty();
-            if (event.getPolicyId() != null) {
-                policyOpt = policyService.findById(event.getPolicyId());
+            UUID customerId = event.getCustomerId();
+            String customerNumber = event.getCustomerNumber();
+
+            Optional<Customer> customerOpt;
+
+            if (customerNumber != null && !customerNumber.isBlank()) {
+                customerOpt = customerService.findByCustomerNumber(customerNumber);
+            } else if (customerId != null) {
+                customerOpt = customerService.findById(customerId);
+            } else {
+                customerOpt = Optional.empty();
             }
 
-            Policy policy = policyOpt.orElse(null);
-            boolean coverageValid = evaluateCoverage(policy);
+            Customer customer = customerOpt.orElse(null);
 
-            evaluationResultProducer.publishPolicyEvaluationResult(
+            validationResultProducer.publishValidationResult(
                     event.getClaimId(),
-                    policy,
-                    coverageValid
+                    customerId,
+                    customerNumber,
+                    customer
             );
 
             outcome = "success";
@@ -94,26 +101,11 @@ public class ClaimEventsConsumer {
         } catch (Exception ex) {
             outcome = "error";
             incrementCounter(outcome, eventTypeName);
-            log.error("Error while handling ClaimEvent in PolicyService: {}", ex.getMessage(), ex);
+            log.error("Error while handling ClaimEvent in CustomerService: {}", ex.getMessage(), ex);
             throw ex;
         } finally {
             stopSample(sample, outcome, eventTypeName);
         }
     }
 
-    private boolean evaluateCoverage(Policy policy) {
-        if (policy == null) {
-            return false;
-        }
-
-        // sehr einfache Deckungslogik:
-        // - Policy ACTIVE
-        // - heutiges Datum liegt in [validFrom, validTo]
-        LocalDate today = LocalDate.now();
-        boolean withinValidity =
-                (policy.getValidFrom() == null || !today.isBefore(policy.getValidFrom())) &&
-                        (policy.getValidTo() == null || !today.isAfter(policy.getValidTo()));
-
-        return "ACTIVE".equalsIgnoreCase(policy.getStatus().name()) && withinValidity;
-    }
 }

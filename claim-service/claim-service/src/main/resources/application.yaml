@@ -39,6 +39,7 @@ management:
         claims.rest.latency: true
         claims.grpc.latency: true
         claims.kafka.producer.latency: true
+        claims.kafka.consumer.latency: true
         claims.service.operation.duration: true
 
       percentiles:
@@ -46,6 +47,7 @@ management:
         claims.grpc.latency: 0.5, 0.95, 0.99
         claims.kafka.producer.latency: 0.5, 0.95, 0.99
         claims.service.operation.duration: 0.5, 0.95, 0.99
+        claims.kafka.consumer.latency: 0.5, 0.95, 0.99
 
 policy:
   service:
@@ -54,3 +56,11 @@ policy:
   grpc:
     host: localhost
     port: 9191
+
+customer:
+  service:
+    base-url: http://localhost:8083
+
+  grpc:
+    host: localhost
+    port: 9192

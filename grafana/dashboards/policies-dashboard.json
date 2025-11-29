@@ -1,0 +1,365 @@
+{
+    "id": null,
+    "uid": "policy-service-metrics",
+    "title": "Policy Service – Metrics (REST / gRPC / Kafka)",
+    "timezone": "browser",
+    "schemaVersion": 39,
+    "version": 1,
+    "refresh": "5s",
+    "time": {
+      "from": "now-15m",
+      "to": "now"
+    },
+    "tags": [
+      "policy",
+      "microservices",
+      "thesis"
+    ],
+    "panels": [
+      {
+        "id": 1,
+        "type": "row",
+        "title": "REST Latency",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+        "collapsed": false,
+        "panels": []
+      },
+      {
+        "id": 2,
+        "type": "timeseries",
+        "title": "REST latency (p50 / p95 / p99) by method",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 1 },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "min": 0,
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 20
+            }
+          },
+          "overrides": []
+        },
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "histogram_quantile(0.5, sum(rate(policies_rest_latency_seconds_bucket[5m])) by (le, method))",
+            "legendFormat": "p50 {{method}}"
+          },
+          {
+            "refId": "B",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "histogram_quantile(0.95, sum(rate(policies_rest_latency_seconds_bucket[5m])) by (le, method))",
+            "legendFormat": "p95 {{method}}"
+          },
+          {
+            "refId": "C",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "histogram_quantile(0.99, sum(rate(policies_rest_latency_seconds_bucket[5m])) by (le, method))",
+            "legendFormat": "p99 {{method}}"
+          }
+        ]
+      },
+  
+      {
+        "id": 3,
+        "type": "row",
+        "title": "gRPC Latency",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 },
+        "collapsed": false,
+        "panels": []
+      },
+      {
+        "id": 4,
+        "type": "timeseries",
+        "title": "gRPC latency (p50 / p95 / p99) by method",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 10 },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "min": 0,
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 20
+            }
+          },
+          "overrides": []
+        },
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "histogram_quantile(0.5, sum(rate(policies_grpc_latency_seconds_bucket[5m])) by (le, method))",
+            "legendFormat": "p50 {{method}}"
+          },
+          {
+            "refId": "B",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "histogram_quantile(0.95, sum(rate(policies_grpc_latency_seconds_bucket[5m])) by (le, method))",
+            "legendFormat": "p95 {{method}}"
+          },
+          {
+            "refId": "C",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "histogram_quantile(0.99, sum(rate(policies_grpc_latency_seconds_bucket[5m])) by (le, method))",
+            "legendFormat": "p99 {{method}}"
+          }
+        ]
+      },
+  
+      {
+        "id": 5,
+        "type": "row",
+        "title": "Kafka Consumer Latency",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 },
+        "collapsed": false,
+        "panels": []
+      },
+      {
+        "id": 6,
+        "type": "timeseries",
+        "title": "Kafka consumer latency (p50 / p95 / p99) by event_type",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 19 },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "min": 0,
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 20
+            }
+          },
+          "overrides": []
+        },
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "histogram_quantile(0.5, sum(rate(policies_kafka_consumer_latency_seconds_bucket[5m])) by (le, event_type))",
+            "legendFormat": "p50 {{event_type}}"
+          },
+          {
+            "refId": "B",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "histogram_quantile(0.95, sum(rate(policies_kafka_consumer_latency_seconds_bucket[5m])) by (le, event_type))",
+            "legendFormat": "p95 {{event_type}}"
+          },
+          {
+            "refId": "C",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "histogram_quantile(0.99, sum(rate(policies_kafka_consumer_latency_seconds_bucket[5m])) by (le, event_type))",
+            "legendFormat": "p99 {{event_type}}"
+          }
+        ]
+      },
+  
+      {
+        "id": 7,
+        "type": "row",
+        "title": "Throughput (req/s, calls/s, msgs/s)",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 27 },
+        "collapsed": false,
+        "panels": []
+      },
+      {
+        "id": 8,
+        "type": "timeseries",
+        "title": "REST throughput (req/s) by method",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 28 },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "req/s",
+            "min": 0
+          },
+          "overrides": []
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "sum(rate(policies_rest_requests_total[1m])) by (method, outcome)",
+            "legendFormat": "{{method}} ({{outcome}})"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "type": "timeseries",
+        "title": "gRPC throughput (calls/s) by method",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 28 },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops/s",
+            "min": 0
+          },
+          "overrides": []
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "sum(rate(policies_grpc_requests_total[1m])) by (method, outcome)",
+            "legendFormat": "{{method}} ({{outcome}})"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "type": "timeseries",
+        "title": "Kafka events (msgs/s) by event_type",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 28 },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "msgs/s",
+            "min": 0
+          },
+          "overrides": []
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "expr": "sum(rate(policies_kafka_consumer_events_total[1m])) by (event_type, outcome)",
+            "legendFormat": "{{event_type}} ({{outcome}})"
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": [
+        {
+          "type": "dashboard",
+          "name": "Annotations & Alerts",
+          "enable": true
+        }
+      ]
+    }
+  }
+  

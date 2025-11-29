@@ -20,9 +20,13 @@ spring:
       mode: always
 
   kafka:
-    bootstrap-servers: claims-kafka:9092   # Host sieht Kafka über localhost
+    bootstrap-servers: claims-kafka:9092
     consumer:
       group-id: policy-service
+
+policies:
+  events:
+    evaluation-topic-name: policy-evaluation-results
 
 management:
   endpoints:
@@ -36,12 +40,13 @@ management:
         policies.rest.latency: true
         policies.grpc.latency: true
         policies.kafka.consumer.latency: true
+        policies.events.publish.latency: true
 
       percentiles:
         policies.rest.latency: 0.5, 0.95, 0.99
         policies.grpc.latency: 0.5, 0.95, 0.99
         policies.kafka.consumer.latency: 0.5, 0.95, 0.99
-
+        policies.events.publish.latency: 0.5, 0.95, 0.99
 
 grpc:
   server:
