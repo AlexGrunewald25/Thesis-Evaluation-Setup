@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package policies;
+
+option java_multiple_files = true;
+option java_package = "com.example.policies.grpc";
+option java_outer_classname = "PoliciesProto";
+
+message GetPolicyRequest {
+  string policy_id = 1;
+}
+
+message Policy {
+  string id = 1;
+  string policy_number = 2;
+  string product_code = 3;  // NEU
+  string status = 4;
+  string valid_from = 5;    // NEU (ISO-8601 Datum, z. B. 2025-11-27)
+  string valid_to = 6;      // NEU
+}
+
+message GetPolicyResponse {
+  Policy policy = 1;
+}
+
+service PolicyService {
+  rpc GetPolicy(GetPolicyRequest) returns (GetPolicyResponse);
+}

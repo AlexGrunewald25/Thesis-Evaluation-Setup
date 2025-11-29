@@ -6,6 +6,7 @@ import com.example.claims.application.ClaimIntegrationService;
 import com.example.claims.infrastructure.persistence.ClaimEntity;
 import com.example.claims.infrastructure.persistence.ClaimEntityMapper;
 import com.example.claims.infrastructure.persistence.ClaimJpaRepository;
+import com.example.claims.infrastructure.policy.PolicyClient;
 import com.example.claims.support.error.ClaimNotFoundException;
 import com.example.claims.support.error.InvalidClaimStateException;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -28,6 +29,7 @@ public class ClaimServiceImpl implements ClaimService {
     private final ClaimEntityMapper claimEntityMapper;
     private final ClaimIntegrationService claimIntegrationService;
     private final MeterRegistry meterRegistry;
+    private final PolicyClient policyClient;
 
     // Helper: Timer für eine Operation mit Tag "operation"
     private Timer timer(String operation) {
@@ -54,6 +56,20 @@ public class ClaimServiceImpl implements ClaimService {
 
         return timer("submit").record(() -> {
             incrementCounter("submit");
+
+            // Policy-Lookup über PolicyService -----------------------
+            policyClient.getPolicyById(policyId)
+                    .ifPresentOrElse(
+                            policy -> meterRegistry.counter(
+                                            "claims_policy_lookup_total",
+                                            "outcome", "found")
+                                    .increment(),
+                            () -> meterRegistry.counter(
+                                            "claims_policy_lookup_total",
+                                            "outcome", "not_found")
+                                    .increment()
+                    );
+            // -----------------------------------------------------------------
 
             var now = OffsetDateTime.now();
 

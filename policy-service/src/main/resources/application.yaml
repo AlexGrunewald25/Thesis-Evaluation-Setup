@@ -10,18 +10,39 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    defer-datasource-initialization: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  sql:
+    init:
+      mode: always
+
+  kafka:
+    bootstrap-servers: claims-kafka:9092   # Host sieht Kafka über localhost
+    consumer:
+      group-id: policy-service
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus
-  endpoint:
-    prometheus:
-      enabled: true
+        include: health,info,metrics,prometheus
+
   metrics:
-    tags:
-      application: policy-service
+    distribution:
+      percentiles-histogram:
+        policies.rest.latency: true
+        policies.grpc.latency: true
+        policies.kafka.consumer.latency: true
+
+      percentiles:
+        policies.rest.latency: 0.5, 0.95, 0.99
+        policies.grpc.latency: 0.5, 0.95, 0.99
+        policies.kafka.consumer.latency: 0.5, 0.95, 0.99
+
+
+grpc:
+  server:
+    port: 9191
