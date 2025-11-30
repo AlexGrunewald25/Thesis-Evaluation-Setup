@@ -5,18 +5,34 @@ import grpc from 'k6/net/grpc';
 // -----------------------------------------------------------------------------
 // Parameter / Basis-URLs
 // -----------------------------------------------------------------------------
+//
+// PATTERN steuert das globale Kommunikationsmuster im gesamten Szenario:
+//
+//   PATTERN=rest   → Claim/Policy/Customer mit REST-Inter-Service-Kommunikation
+//   PATTERN=grpc   → Claim/Policy/Customer mit gRPC-Kommunikation
+//   PATTERN=event  → Claim/Policy/Customer mit Event-driven-Kommunikation
+//
+// Aus Sicht von k6 unterscheiden wir nur zwischen
+//   - gRPC (direkter gRPC-Client)
+//   - HTTP (REST und EVENT teilen sich denselben HTTP-Endpunkt /claims)
+// -----------------------------------------------------------------------------
 
-const PATTERN = __ENV.PATTERN || 'rest'; // 'rest' oder 'grpc'
-const BASE_URL = __ENV.BASE_URL || 'http://host.docker.internal:8080';
-const GRPC_TARGET = __ENV.GRPC_TARGET || 'host.docker.internal:9090';
+const PATTERN = __ENV.PATTERN || 'rest'; // 'rest', 'grpc' oder 'event'
+
+// Default-URLs für das Docker-Compose-Szenario.
+// Können bei Bedarf über Environment-Variablen überschrieben werden.
+const BASE_URL = __ENV.BASE_URL || 'http://claim-service:8080';
+const GRPC_TARGET = __ENV.GRPC_TARGET || 'claim-service:9090';
+
 const isGrpc = PATTERN === 'grpc';
 
 // gRPC-Client und Proto
 const grpcClient = new grpc.Client();
+// In Docker wird /proto auf claim-service/claim-service/src/main/proto gemountet
 grpcClient.load(['/proto'], 'claims.proto');
 
 // -----------------------------------------------------------------------------
-// Szenarien
+// Szenarien (Warmup + Breakpoint) – unverändert aus deiner bisherigen Version
 // -----------------------------------------------------------------------------
 
 const scenarios = {
@@ -49,10 +65,12 @@ const scenarios = {
 
 const thresholds = isGrpc
   ? {
-      // gRPC hat nur grpc_req_duration als Built-in-Metrik
+      // gRPC hat grpc_req_duration als Built-in-Metrik
       grpc_req_duration: ['p(95)<500'],
     }
   : {
+      // REST und EVENT verwenden denselben HTTP-Endpunkt /claims,
+      // unterscheiden sich aber in der internen Kommunikation der Services.
       http_req_duration: ['p(95)<500'],
       http_req_failed: ['rate<0.01'],
     };
@@ -71,21 +89,22 @@ export default function () {
   if (isGrpc) {
     executeGrpcSubmitClaim();
   } else {
-    executeRestSubmitClaim();
+    // PATTERN = 'rest' oder 'event' → HTTP-Aufruf /claims
+    executeRestOrEventSubmitClaim();
   }
 }
 
 // -----------------------------------------------------------------------------
-// REST-Szenario: POST /claims
+// HTTP-Szenario (REST + EVENT): POST /claims
 // -----------------------------------------------------------------------------
 
-function executeRestSubmitClaim() {
+function executeRestOrEventSubmitClaim() {
   const url = `${BASE_URL}/claims`;
 
   const payload = JSON.stringify({
     policyId: '11111111-1111-1111-1111-111111111111',
-    customerId: '22222222-2222-2222-2222-222222222222',
-    description: 'Test claim for load test',
+    customerId: '11111111-1111-1111-1111-111111111111',
+    description: `Test claim for load test (${PATTERN})`,
     reportedAmount: 1000.0,
   });
 
@@ -98,7 +117,7 @@ function executeRestSubmitClaim() {
   const res = http.post(url, payload, params);
 
   check(res, {
-    'REST status is 2xx': (r) => r.status >= 200 && r.status < 300,
+    'HTTP status is 2xx': (r) => r.status >= 200 && r.status < 300,
   });
 }
 
@@ -111,8 +130,8 @@ function executeGrpcSubmitClaim() {
 
   const request = {
     policyId: '11111111-1111-1111-1111-111111111111',
-    customerId: '22222222-2222-2222-2222-222222222222',
-    description: 'Test claim for load test',
+    customerId: '11111111-1111-1111-1111-111111111111',
+    description: 'Test claim for load test (grpc)',
     reportedAmount: 1000.0,
   };
 

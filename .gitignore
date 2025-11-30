@@ -1,2 +1,75 @@
+########################
+# k6 / Lasttest-Artefakte
+########################
+
+# Exportierte k6-Resultate
+/results/
+/results;C
+
+# CSV-Ergebnisse aus Lasttests
 loadtests/*.csv
-loadtests/*.csv
+
+########################
+# Maven / Java Build-Ausgaben
+########################
+
+# Alle Maven-Target-Verzeichnisse (Services, ggf. Root)
+**/target/
+
+# Maven Wrapper-Logs (falls vorhanden)
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+########################
+# IDE- und Editor-Dateien
+########################
+
+# IntelliJ / IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse / STS
+.project
+.classpath
+.settings/
+
+# VS Code
+.vscode/
+
+# Sonstige Editor-Backups
+*~
+*.swp
+*.swo
+
+########################
+# Betriebssystem-Kram
+########################
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+########################
+# Logs & temporäre Dateien
+########################
+
+logs/
+log/
+*.log
+
+# Temporäre Dateien
+tmp/
+temp/
+*.tmp
+
+########################
+# Sonstige
+########################
+
+.env
+.env.local

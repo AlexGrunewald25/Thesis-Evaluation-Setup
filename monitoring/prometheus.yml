@@ -7,13 +7,19 @@ scrape_configs:
   - job_name: "claim-service"
     metrics_path: "/actuator/prometheus"
     static_configs:
-      - targets: ["host.docker.internal:8080"]
+      - targets: ["claim-service:8080"]
 
   - job_name: 'policy-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets:
-          - 'host.docker.internal:8081'
+          - "policy-service:8081"
+
+  - job_name: 'customer-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets:
+          - "customer-service:8083"
 
   # Prometheus selbst (optional, nützlich zum Debuggen)
   - job_name: "prometheus"

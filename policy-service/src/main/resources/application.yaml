@@ -1,6 +1,7 @@
 server:
   port: 8081
 
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/policydb
@@ -23,6 +24,9 @@ spring:
     bootstrap-servers: claims-kafka:9092
     consumer:
       group-id: policy-service
+
+  profiles:
+    default: rest
 
 policies:
   events:

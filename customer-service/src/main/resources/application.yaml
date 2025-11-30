@@ -25,6 +25,9 @@ spring:
     consumer:
       group-id: customer-service
 
+  profiles:
+    default: rest
+
 customers:
   events:
     validation-topic-name: customers.customer-validation-events

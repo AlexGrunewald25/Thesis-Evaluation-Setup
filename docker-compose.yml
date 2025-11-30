@@ -113,9 +113,16 @@ services:
     profiles: ["loadtest"]
     depends_on:
       - prometheus
+      - claim-service
+    working_dir: /results               # << neu
     volumes:
       - ./loadtests:/scripts
       - ./claim-service/claim-service/src/main/proto:/proto
+      - ./results:/results              # Host-Ordner -> Container-/results
+    environment:
+      BASE_URL: http://claim-service:8080
+      GRPC_TARGET: claim-service:9090
+      PATTERN: ${PATTERN:-rest}
     entrypoint: [ "k6", "run", "/scripts/claim_breakpoint.js" ]
 
   k6-constant:
@@ -124,12 +131,95 @@ services:
     profiles: ["loadtest"]
     depends_on:
       - prometheus
+      - claim-service
+    working_dir: /results               # << neu
     volumes:
       - ./loadtests:/scripts
       - ./claim-service/claim-service/src/main/proto:/proto
+      - ./results:/results              # Host-Ordner -> Container-/results
+    environment:
+      BASE_URL: http://claim-service:8080
+      GRPC_TARGET: claim-service:9090
+      PATTERN: ${PATTERN:-rest}
     entrypoint: [ "k6", "run", "/scripts/claim_constant_load.js" ]
 
 
+  claim-service:
+    build:
+      context: ./claim-service/claim-service
+      dockerfile: Dockerfile
+    container_name: claim-service
+    depends_on:
+      - postgres
+      - kafka
+      - policy-service
+      - customer-service
+    environment:
+      # Kommunikationsmuster für diesen Run (Standard: rest)
+      SPRING_PROFILES_ACTIVE: ${PATTERN:-rest}
+      # Datenbank-Verbindung (überschreibt localhost in application.yaml)
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/claimsdb
+      SPRING_DATASOURCE_USERNAME: claims_user
+      SPRING_DATASOURCE_PASSWORD: claims_password
+
+      # HTTP-Server-Port (optional explizit)
+      SERVER_PORT: 8080
+
+      # REST-Integration zu Policy & Customer (interner DNS-Name = Servicename)
+      POLICY_SERVICE_BASE_URL: http://policy-service:8081
+      CUSTOMER_SERVICE_BASE_URL: http://customer-service:8083
+
+      # gRPC-Integration
+      POLICY_GRPC_HOST: policy-service
+      POLICY_GRPC_PORT: 9191
+      CUSTOMER_GRPC_HOST: customer-service
+      CUSTOMER_GRPC_PORT: 9192
+    ports:
+      - "8080:8080"   # REST nach außen
+      - "9090:9090"   # gRPC nach außen (für k6, falls du extern testen willst)
+
+
+  policy-service:
+    build:
+      context: ./policy-service
+      dockerfile: Dockerfile
+    container_name: policy-service
+    depends_on:
+      - postgres
+      - kafka
+    environment:
+      # Kommunikationsmuster für diesen Run (Standard: rest)
+      SPRING_PROFILES_ACTIVE: ${PATTERN:-rest}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/policydb
+      SPRING_DATASOURCE_USERNAME: policy_user
+      SPRING_DATASOURCE_PASSWORD: policy_password
+
+      SERVER_PORT: 8081
+      GRPC_SERVER_PORT: 9191
+    ports:
+      - "8081:8081"
+      - "9191:9191"
+
+  customer-service:
+    build:
+      context: ./customer-service
+      dockerfile: Dockerfile
+    container_name: customer-service
+    depends_on:
+      - postgres
+      - kafka
+    environment:
+      # Kommunikationsmuster für diesen Run (Standard: rest)
+      SPRING_PROFILES_ACTIVE: ${PATTERN:-rest}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/customerdb
+      SPRING_DATASOURCE_USERNAME: customer_user
+      SPRING_DATASOURCE_PASSWORD: customer_password
+
+      SERVER_PORT: 8083
+      GRPC_SERVER_PORT: 9192
+    ports:
+      - "8083:8083"
+      - "9192:9192"
 
 
 volumes:

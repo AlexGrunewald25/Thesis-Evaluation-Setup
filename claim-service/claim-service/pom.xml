@@ -103,6 +103,15 @@
 	</dependencies>
 
 	<build>
+		<!-- NEU: sorgt dafür, dass ${os.detected.classifier} gesetzt wird -->
+		<extensions>
+			<extension>
+				<groupId>kr.motd.maven</groupId>
+				<artifactId>os-maven-plugin</artifactId>
+				<version>1.7.1</version>
+			</extension>
+		</extensions>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -116,6 +125,7 @@
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -128,18 +138,21 @@
 					</excludes>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.xolstice.maven.plugins</groupId>
 				<artifactId>protobuf-maven-plugin</artifactId>
 				<version>0.6.1</version>
 				<configuration>
-					<!-- für Windows 64-bit -->
+					<!-- protoc aus Maven Central, OS-spezifisch -->
 					<protocArtifact>
-						com.google.protobuf:protoc:3.25.3:exe:windows-x86_64
+						com.google.protobuf:protoc:3.24.4:exe:${os.detected.classifier}
 					</protocArtifact>
+
+					<!-- gRPC-Stubs -->
 					<pluginId>grpc-java</pluginId>
 					<pluginArtifact>
-						io.grpc:protoc-gen-grpc-java:1.66.0:exe:windows-x86_64
+						io.grpc:protoc-gen-grpc-java:1.66.0:exe:${os.detected.classifier}
 					</pluginArtifact>
 				</configuration>
 				<executions>
@@ -151,7 +164,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 		</plugins>
 	</build>
 

@@ -2,6 +2,9 @@ spring:
   application:
     name: claims-service
 
+  profiles:
+    default: rest
+
   datasource:
     url: jdbc:postgresql://localhost:5432/claimsdb
     username: claims_user

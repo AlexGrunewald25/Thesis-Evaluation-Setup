@@ -1,0 +1,22 @@
+# --- Build-Stage -----------------------------------------------------------
+FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /workspace
+
+# Maven-Definition und Quellcode kopieren
+COPY pom.xml .
+COPY src ./src
+
+# Jar bauen (Tests werden für schnellere Builds übersprungen)
+RUN mvn -B -DskipTests package
+
+# --- Runtime-Stage ---------------------------------------------------------
+FROM eclipse-temurin:21-jdk-jammy
+WORKDIR /app
+
+# Fat-Jar aus Build-Stage übernehmen
+COPY --from=build /workspace/target/*.jar app.jar
+
+# HTTP-Port (8081) und gRPC-Port (9191) dokumentieren
+EXPOSE 8081 9191
+
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
