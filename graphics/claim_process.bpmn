@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_ClaimProcess" targetNamespace="http://example.org/claimprocess" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.9.0">
+  <bpmn:process id="ClaimProcess" name="Claim process (non-life insurance)" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_ClaimReported" name="Claim reported">
+      <bpmn:outgoing>Flow_Start_Report</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="EndEvent_EarlyRejected" name="End – claim rejected (no coverage)">
+      <bpmn:incoming>Flow_0ixbfp7</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent_Settled" name="End – claim settled">
+      <bpmn:incoming>Flow_1uwdxot</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent_RejectedAfterAssessment" name="End – claim rejected (after assessment)">
+      <bpmn:incoming>Flow_10a6kyo</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="Task_ReportClaim" name="Report claim">
+      <bpmn:incoming>Flow_Start_Report</bpmn:incoming>
+      <bpmn:outgoing>Flow_Report_Register</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:task id="Task_RegisterClaim" name="Register claim">
+      <bpmn:incoming>Flow_Report_Register</bpmn:incoming>
+      <bpmn:outgoing>Flow_Register_CompletenessGateway</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_Completeness" name="Information complete and assignable?">
+      <bpmn:incoming>Flow_Register_CompletenessGateway</bpmn:incoming>
+      <bpmn:incoming>Flow_ReviewAdditional_BackToCompleteness</bpmn:incoming>
+      <bpmn:outgoing>Flow_Completeness_To_RequestInfo</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Completeness_To_CoverageCheck</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Task_RequestAdditionalInfo" name="Request additional information">
+      <bpmn:incoming>Flow_Completeness_To_RequestInfo</bpmn:incoming>
+      <bpmn:outgoing>Flow_RequestInfo_ProvideInfo</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:userTask id="Task_ProvideAdditionalInfo" name="Provide additional information">
+      <bpmn:incoming>Flow_RequestInfo_ProvideInfo</bpmn:incoming>
+      <bpmn:outgoing>Flow_ProvideInfo_ReviewAdditional</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:task id="Task_ReviewAdditionalInfo" name="Review additional information">
+      <bpmn:incoming>Flow_ProvideInfo_ReviewAdditional</bpmn:incoming>
+      <bpmn:outgoing>Flow_ReviewAdditional_BackToCompleteness</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_CoverageCheck" name="Perform coverage check">
+      <bpmn:incoming>Flow_Completeness_To_CoverageCheck</bpmn:incoming>
+      <bpmn:outgoing>Flow_CoverageCheck_CoverageGateway</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_Coverage" name="Coverage granted?">
+      <bpmn:incoming>Flow_CoverageCheck_CoverageGateway</bpmn:incoming>
+      <bpmn:outgoing>Flow_Coverage_To_EarlyRejection</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Coverage_To_AssessmentSplit</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Task_PrepareEarlyRejection" name="Prepare rejection (no coverage)">
+      <bpmn:incoming>Flow_Coverage_To_EarlyRejection</bpmn:incoming>
+      <bpmn:outgoing>Flow_1juh3f0</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_InformEarlyRejection" name="Inform policyholder (rejection)">
+      <bpmn:incoming>Flow_1juh3f0</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ixbfp7</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:parallelGateway id="Gateway_Assessment_SPLIT" name="Further assessment required">
+      <bpmn:incoming>Flow_Coverage_To_AssessmentSplit</bpmn:incoming>
+      <bpmn:outgoing>Flow_Split_To_FraudCheck</bpmn:outgoing>
+      <bpmn:outgoing>Flow_10g51dy</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:task id="Task_RequestDocuments" name="Request supporting documents">
+      <bpmn:incoming>Flow_10g51dy</bpmn:incoming>
+      <bpmn:outgoing>Flow_RequestDocs_ReceiveDocs</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:userTask id="Task_ReceiveDocuments" name="Receive documents">
+      <bpmn:incoming>Flow_RequestDocs_ReceiveDocs</bpmn:incoming>
+      <bpmn:outgoing>Flow_1x01jiu</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:task id="Task_FraudCheck" name="Perform plausibility / fraud check">
+      <bpmn:incoming>Flow_Split_To_FraudCheck</bpmn:incoming>
+      <bpmn:outgoing>Flow_FraudCheck_To_AssessmentJOIN</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:parallelGateway id="Gateway_Assessment_JOIN" name="All assessments completed">
+      <bpmn:incoming>Flow_FraudCheck_To_AssessmentJOIN</bpmn:incoming>
+      <bpmn:incoming>Flow_1x01jiu</bpmn:incoming>
+      <bpmn:outgoing>Flow_0kzzic0</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:task id="Task_AssessClaim" name="Assess claim">
+      <bpmn:incoming>Flow_0kzzic0</bpmn:incoming>
+      <bpmn:outgoing>Flow_10iys8w</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_FinalDecision" name="Final decision">
+      <bpmn:incoming>Flow_10iys8w</bpmn:incoming>
+      <bpmn:outgoing>Flow_FinalDecision_To_Approve</bpmn:outgoing>
+      <bpmn:outgoing>Flow_FinalDecision_To_Reject</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Task_CalculatePayment" name="Calculate payment amount">
+      <bpmn:incoming>Flow_FinalDecision_To_Approve</bpmn:incoming>
+      <bpmn:outgoing>Flow_CalculatePayment_ExecutePayment</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_ExecutePayment" name="Execute payment">
+      <bpmn:incoming>Flow_CalculatePayment_ExecutePayment</bpmn:incoming>
+      <bpmn:outgoing>Flow_ExecutePayment_CloseClaim</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_CloseClaim" name="Close claim">
+      <bpmn:incoming>Flow_ExecutePayment_CloseClaim</bpmn:incoming>
+      <bpmn:outgoing>Flow_1uwdxot</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_PrepareRejection" name="Prepare rejection (after assessment)">
+      <bpmn:incoming>Flow_FinalDecision_To_Reject</bpmn:incoming>
+      <bpmn:outgoing>Flow_04f6z4g</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_InformRejection" name="Inform policyholder (rejection)">
+      <bpmn:incoming>Flow_04f6z4g</bpmn:incoming>
+      <bpmn:outgoing>Flow_10a6kyo</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_Start_Report" sourceRef="StartEvent_ClaimReported" targetRef="Task_ReportClaim" />
+    <bpmn:sequenceFlow id="Flow_Report_Register" sourceRef="Task_ReportClaim" targetRef="Task_RegisterClaim" />
+    <bpmn:sequenceFlow id="Flow_Register_CompletenessGateway" sourceRef="Task_RegisterClaim" targetRef="Gateway_Completeness" />
+    <bpmn:sequenceFlow id="Flow_Completeness_To_RequestInfo" sourceRef="Gateway_Completeness" targetRef="Task_RequestAdditionalInfo" />
+    <bpmn:sequenceFlow id="Flow_Completeness_To_CoverageCheck" sourceRef="Gateway_Completeness" targetRef="Task_CoverageCheck" />
+    <bpmn:sequenceFlow id="Flow_RequestInfo_ProvideInfo" sourceRef="Task_RequestAdditionalInfo" targetRef="Task_ProvideAdditionalInfo" />
+    <bpmn:sequenceFlow id="Flow_ProvideInfo_ReviewAdditional" sourceRef="Task_ProvideAdditionalInfo" targetRef="Task_ReviewAdditionalInfo" />
+    <bpmn:sequenceFlow id="Flow_ReviewAdditional_BackToCompleteness" sourceRef="Task_ReviewAdditionalInfo" targetRef="Gateway_Completeness" />
+    <bpmn:sequenceFlow id="Flow_CoverageCheck_CoverageGateway" sourceRef="Task_CoverageCheck" targetRef="Gateway_Coverage" />
+    <bpmn:sequenceFlow id="Flow_Coverage_To_EarlyRejection" sourceRef="Gateway_Coverage" targetRef="Task_PrepareEarlyRejection" />
+    <bpmn:sequenceFlow id="Flow_Coverage_To_AssessmentSplit" sourceRef="Gateway_Coverage" targetRef="Gateway_Assessment_SPLIT" />
+    <bpmn:sequenceFlow id="Flow_Split_To_FraudCheck" sourceRef="Gateway_Assessment_SPLIT" targetRef="Task_FraudCheck" />
+    <bpmn:sequenceFlow id="Flow_RequestDocs_ReceiveDocs" sourceRef="Task_RequestDocuments" targetRef="Task_ReceiveDocuments" />
+    <bpmn:sequenceFlow id="Flow_FraudCheck_To_AssessmentJOIN" sourceRef="Task_FraudCheck" targetRef="Gateway_Assessment_JOIN" />
+    <bpmn:sequenceFlow id="Flow_FinalDecision_To_Approve" sourceRef="Gateway_FinalDecision" targetRef="Task_CalculatePayment" />
+    <bpmn:sequenceFlow id="Flow_FinalDecision_To_Reject" sourceRef="Gateway_FinalDecision" targetRef="Task_PrepareRejection" />
+    <bpmn:sequenceFlow id="Flow_CalculatePayment_ExecutePayment" sourceRef="Task_CalculatePayment" targetRef="Task_ExecutePayment" />
+    <bpmn:sequenceFlow id="Flow_ExecutePayment_CloseClaim" sourceRef="Task_ExecutePayment" targetRef="Task_CloseClaim" />
+    <bpmn:sequenceFlow id="Flow_1juh3f0" sourceRef="Task_PrepareEarlyRejection" targetRef="Task_InformEarlyRejection" />
+    <bpmn:sequenceFlow id="Flow_0ixbfp7" sourceRef="Task_InformEarlyRejection" targetRef="EndEvent_EarlyRejected" />
+    <bpmn:sequenceFlow id="Flow_10g51dy" sourceRef="Gateway_Assessment_SPLIT" targetRef="Task_RequestDocuments" />
+    <bpmn:sequenceFlow id="Flow_1x01jiu" sourceRef="Task_ReceiveDocuments" targetRef="Gateway_Assessment_JOIN" />
+    <bpmn:sequenceFlow id="Flow_10iys8w" sourceRef="Task_AssessClaim" targetRef="Gateway_FinalDecision" />
+    <bpmn:sequenceFlow id="Flow_0kzzic0" sourceRef="Gateway_Assessment_JOIN" targetRef="Task_AssessClaim" />
+    <bpmn:sequenceFlow id="Flow_1uwdxot" sourceRef="Task_CloseClaim" targetRef="EndEvent_Settled" />
+    <bpmn:sequenceFlow id="Flow_04f6z4g" sourceRef="Task_PrepareRejection" targetRef="Task_InformRejection" />
+    <bpmn:sequenceFlow id="Flow_10a6kyo" sourceRef="Task_InformRejection" targetRef="EndEvent_RejectedAfterAssessment" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ClaimProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_ClaimProcess" bpmnElement="ClaimProcess">
+      <bpmndi:BPMNShape id="Task_ReportClaim_di" bpmnElement="Task_ReportClaim">
+        <dc:Bounds x="270" y="250" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_RegisterClaim_di" bpmnElement="Task_RegisterClaim">
+        <dc:Bounds x="430" y="250" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Completeness_di" bpmnElement="Gateway_Completeness" isMarkerVisible="true">
+        <dc:Bounds x="590" y="265" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="650.5" y="250" width="67" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Assessment_SPLIT_di" bpmnElement="Gateway_Assessment_SPLIT">
+        <dc:Bounds x="970" y="340" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="965" y="300" width="60" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_ClaimReported_di" bpmnElement="StartEvent_ClaimReported">
+        <dc:Bounds x="172" y="276" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="154" y="312" width="73" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_RequestAdditionalInfo_di" bpmnElement="Task_RequestAdditionalInfo">
+        <dc:Bounds x="540" y="80" width="150" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CoverageCheck_di" bpmnElement="Task_CoverageCheck">
+        <dc:Bounds x="540" y="450" width="150" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Coverage_di" bpmnElement="Gateway_Coverage" isMarkerVisible="true">
+        <dc:Bounds x="815" y="443" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="875" y="454.5" width="48" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_PrepareEarlyRejection_di" bpmnElement="Task_PrepareEarlyRejection">
+        <dc:Bounds x="905" y="600" width="170" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_InformEarlyRejection_di" bpmnElement="Task_InformEarlyRejection">
+        <dc:Bounds x="1145" y="600" width="170" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_EarlyRejected_di" bpmnElement="EndEvent_EarlyRejected">
+        <dc:Bounds x="1392" y="612" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1381" y="648" width="59" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_FraudCheck_di" bpmnElement="Task_FraudCheck">
+        <dc:Bounds x="1070" y="430" width="170" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_RequestDocuments_di" bpmnElement="Task_RequestDocuments">
+        <dc:Bounds x="1070" y="335" width="170" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ReceiveDocuments_di" bpmnElement="Task_ReceiveDocuments">
+        <dc:Bounds x="1285" y="335" width="170" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Assessment_JOIN_di" bpmnElement="Gateway_Assessment_JOIN">
+        <dc:Bounds x="1595" y="340" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1479.5" y="336" width="79" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ProvideAdditionalInfo_di" bpmnElement="Task_ProvideAdditionalInfo">
+        <dc:Bounds x="735" y="80" width="150" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ReviewAdditionalInfo_di" bpmnElement="Task_ReviewAdditionalInfo">
+        <dc:Bounds x="935" y="80" width="150" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_AssessClaim_di" bpmnElement="Task_AssessClaim">
+        <dc:Bounds x="1685" y="335" width="150" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_FinalDecision_di" bpmnElement="Gateway_FinalDecision" isMarkerVisible="true">
+        <dc:Bounds x="1895" y="340" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1955" y="358" width="68" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CalculatePayment_di" bpmnElement="Task_CalculatePayment">
+        <dc:Bounds x="1995" y="230" width="170" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_PrepareRejection_di" bpmnElement="Task_PrepareRejection">
+        <dc:Bounds x="1995" y="438" width="170" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_InformRejection_di" bpmnElement="Task_InformRejection">
+        <dc:Bounds x="2225" y="438" width="190" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ExecutePayment_di" bpmnElement="Task_ExecutePayment">
+        <dc:Bounds x="2235" y="230" width="170" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CloseClaim_di" bpmnElement="Task_CloseClaim">
+        <dc:Bounds x="2485" y="230" width="150" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_RejectedAfterAssessment_di" bpmnElement="EndEvent_RejectedAfterAssessment">
+        <dc:Bounds x="2492" y="450" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2475" y="486" width="70" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Settled_di" bpmnElement="EndEvent_Settled">
+        <dc:Bounds x="2712" y="242" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2701" y="278" width="58" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_Start_Report_di" bpmnElement="Flow_Start_Report">
+        <di:waypoint x="208" y="293" />
+        <di:waypoint x="270" y="293" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Report_Register_di" bpmnElement="Flow_Report_Register">
+        <di:waypoint x="390" y="290" />
+        <di:waypoint x="430" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Register_CompletenessGateway_di" bpmnElement="Flow_Register_CompletenessGateway">
+        <di:waypoint x="550" y="290" />
+        <di:waypoint x="590" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Completeness_To_RequestInfo_di" bpmnElement="Flow_Completeness_To_RequestInfo">
+        <di:waypoint x="615" y="265" />
+        <di:waypoint x="615" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Completeness_To_CoverageCheck_di" bpmnElement="Flow_Completeness_To_CoverageCheck">
+        <di:waypoint x="615" y="315" />
+        <di:waypoint x="615" y="450" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_RequestInfo_ProvideInfo_di" bpmnElement="Flow_RequestInfo_ProvideInfo">
+        <di:waypoint x="690" y="110" />
+        <di:waypoint x="735" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ProvideInfo_ReviewAdditional_di" bpmnElement="Flow_ProvideInfo_ReviewAdditional">
+        <di:waypoint x="885" y="110" />
+        <di:waypoint x="935" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ReviewAdditional_BackToCompleteness_di" bpmnElement="Flow_ReviewAdditional_BackToCompleteness">
+        <di:waypoint x="1010" y="140" />
+        <di:waypoint x="1010" y="290" />
+        <di:waypoint x="640" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_CoverageCheck_CoverageGateway_di" bpmnElement="Flow_CoverageCheck_CoverageGateway">
+        <di:waypoint x="690" y="468" />
+        <di:waypoint x="815" y="468" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Coverage_To_EarlyRejection_di" bpmnElement="Flow_Coverage_To_EarlyRejection">
+        <di:waypoint x="840" y="493" />
+        <di:waypoint x="840" y="630" />
+        <di:waypoint x="905" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Coverage_To_AssessmentSplit_di" bpmnElement="Flow_Coverage_To_AssessmentSplit">
+        <di:waypoint x="840" y="443" />
+        <di:waypoint x="840" y="365" />
+        <di:waypoint x="970" y="365" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Split_To_FraudCheck_di" bpmnElement="Flow_Split_To_FraudCheck">
+        <di:waypoint x="995" y="390" />
+        <di:waypoint x="995" y="483" />
+        <di:waypoint x="1071" y="483" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_RequestDocs_ReceiveDocs_di" bpmnElement="Flow_RequestDocs_ReceiveDocs">
+        <di:waypoint x="1240" y="365" />
+        <di:waypoint x="1285" y="365" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_FraudCheck_To_AssessmentJOIN_di" bpmnElement="Flow_FraudCheck_To_AssessmentJOIN">
+        <di:waypoint x="1240" y="473" />
+        <di:waypoint x="1620" y="473" />
+        <di:waypoint x="1620" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_FinalDecision_To_Approve_di" bpmnElement="Flow_FinalDecision_To_Approve">
+        <di:waypoint x="1920" y="340" />
+        <di:waypoint x="1920" y="260" />
+        <di:waypoint x="1995" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_FinalDecision_To_Reject_di" bpmnElement="Flow_FinalDecision_To_Reject">
+        <di:waypoint x="1920" y="390" />
+        <di:waypoint x="1920" y="468" />
+        <di:waypoint x="1990" y="468" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_CalculatePayment_ExecutePayment_di" bpmnElement="Flow_CalculatePayment_ExecutePayment">
+        <di:waypoint x="2165" y="260" />
+        <di:waypoint x="2235" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ExecutePayment_CloseClaim_di" bpmnElement="Flow_ExecutePayment_CloseClaim">
+        <di:waypoint x="2405" y="260" />
+        <di:waypoint x="2485" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1juh3f0_di" bpmnElement="Flow_1juh3f0">
+        <di:waypoint x="1075" y="630" />
+        <di:waypoint x="1145" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ixbfp7_di" bpmnElement="Flow_0ixbfp7">
+        <di:waypoint x="1315" y="630" />
+        <di:waypoint x="1392" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10g51dy_di" bpmnElement="Flow_10g51dy">
+        <di:waypoint x="1020" y="365" />
+        <di:waypoint x="1070" y="365" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1x01jiu_di" bpmnElement="Flow_1x01jiu">
+        <di:waypoint x="1455" y="365" />
+        <di:waypoint x="1595" y="365" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10iys8w_di" bpmnElement="Flow_10iys8w">
+        <di:waypoint x="1835" y="365" />
+        <di:waypoint x="1895" y="365" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0kzzic0_di" bpmnElement="Flow_0kzzic0">
+        <di:waypoint x="1645" y="365" />
+        <di:waypoint x="1685" y="365" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1uwdxot_di" bpmnElement="Flow_1uwdxot">
+        <di:waypoint x="2635" y="260" />
+        <di:waypoint x="2712" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_04f6z4g_di" bpmnElement="Flow_04f6z4g">
+        <di:waypoint x="2165" y="468" />
+        <di:waypoint x="2225" y="468" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10a6kyo_di" bpmnElement="Flow_10a6kyo">
+        <di:waypoint x="2415" y="468" />
+        <di:waypoint x="2492" y="468" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

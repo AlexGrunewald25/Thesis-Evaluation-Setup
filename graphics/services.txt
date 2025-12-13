@@ -1,0 +1,61 @@
+@startuml
+title Microservice-Landschaft des Evaluationsprototyps
+
+skinparam componentStyle rectangle
+skinparam rectangle {
+  BackgroundColor White
+  BorderColor Black
+  RoundCorner 10
+}
+skinparam databaseBackgroundColor White
+skinparam databaseBorderColor Black
+
+package "Customer-Service" {
+  [Customer REST API] as CustomerRest
+  [Customer gRPC API] as CustomerGrpc
+  database "customerdb" as CustomerDB
+}
+
+package "Policy-Service" {
+  [Policy REST API] as PolicyRest
+  [Policy gRPC API] as PolicyGrpc
+  database "policydb" as PolicyDB
+}
+
+package "Claim-Service" {
+  [Claim REST API] as ClaimRest
+  [Claim gRPC API] as ClaimGrpc
+  [Claim Application\n(ClaimServiceImpl)] as ClaimApp
+  database "claimsdb" as ClaimDB
+}
+
+' Datenbankanbindung innerhalb der Services
+CustomerRest -down- CustomerDB
+CustomerGrpc -down- CustomerDB
+
+PolicyRest -down- PolicyDB
+PolicyGrpc -down- PolicyDB
+
+ClaimRest -down- ClaimDB
+ClaimGrpc -down- ClaimDB
+ClaimApp -down- ClaimDB
+
+' Orchestrierung im Claim-Service
+ClaimRest -down- ClaimApp
+ClaimGrpc -down- ClaimApp
+
+' Service-zu-Service-Kommunikation (verschiedene Muster)
+ClaimApp --> CustomerRest : REST / HTTP
+ClaimApp --> CustomerGrpc : gRPC
+
+ClaimApp --> PolicyRest : REST / HTTP
+ClaimApp --> PolicyGrpc : gRPC
+
+' Optional: Eventbasierte Kommunikation über Broker
+cloud "Message Broker\n(z.B. Kafka)" as Broker
+
+ClaimApp ..> Broker : Claim-Events\n(produce)
+Broker ..> CustomerRest : Customer-Events\n(consume)
+Broker ..> PolicyRest : Policy-Events\n(consume)
+
+@enduml

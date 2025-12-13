@@ -1,0 +1,960 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Overview (K6 black-box + REST service metrics)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "K6 Throughput (req/s)",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(k6_http_reqs_total{communication_pattern=\"rest\", test_run=~\"$test_run\", service=~\"$k6_service\"}[$__rate_interval]))",
+          "legendFormat": "",
+          "interval": ""
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "K6 Failed rate",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "avg(k6_http_req_failed_rate{communication_pattern=\"rest\", test_run=~\"$test_run\", service=~\"$k6_service\"})",
+          "legendFormat": "",
+          "interval": ""
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "K6 HTTP p99",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "avg(k6_http_req_duration_p99{communication_pattern=\"rest\", test_run=~\"$test_run\", service=~\"$k6_service\"})",
+          "legendFormat": "",
+          "interval": ""
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "K6 VUs",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "max(k6_vus{test_run=~\"$test_run\"})",
+          "legendFormat": "",
+          "interval": ""
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "K6 Throughput over time (req/s)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(k6_http_reqs_total{communication_pattern=\"rest\", test_run=~\"$test_run\", service=~\"$k6_service\"}[$__rate_interval]))",
+          "legendFormat": "total",
+          "interval": ""
+        },
+        {
+          "refId": "B",
+          "expr": "sum(rate(k6_http_reqs_total{communication_pattern=\"rest\", test_run=~\"$test_run\", service=~\"$k6_service\"}[$__rate_interval])) by (service)",
+          "legendFormat": "{{service}}",
+          "interval": ""
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "K6 Load (VUs) & Dropped iterations",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "max(k6_vus{test_run=~\"$test_run\"})",
+          "legendFormat": "vus",
+          "interval": ""
+        },
+        {
+          "refId": "B",
+          "expr": "sum(rate(k6_dropped_iterations_total{test_run=~\"$test_run\"}[$__rate_interval]))",
+          "legendFormat": "dropped_iter/s",
+          "interval": ""
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Service REST throughput (req/s) by method",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate({__name__=~\"(${svc:regex})_rest_requests_total\", method=~\"$method\"}[$__rate_interval])) by (__name__, method)",
+          "legendFormat": "{{__name__}} • {{method}}",
+          "interval": ""
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Service REST outcomes (req/s) stacked",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate({__name__=~\"(${svc:regex})_rest_requests_total\", method=~\"$method\"}[$__rate_interval])) by (__name__, method, outcome)",
+          "legendFormat": "{{__name__}} • {{method}} • {{outcome}}",
+          "interval": ""
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Service REST latency quantiles (s) from histogram buckets",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.50, sum(rate({__name__=~\"(${svc:regex})_rest_latency_seconds_bucket\", method=~\"$method\"}[$__rate_interval])) by (le, __name__, method))",
+          "legendFormat": "{{__name__}} • {{method}} • p50",
+          "interval": ""
+        },
+        {
+          "refId": "B",
+          "expr": "histogram_quantile(0.95, sum(rate({__name__=~\"(${svc:regex})_rest_latency_seconds_bucket\", method=~\"$method\"}[$__rate_interval])) by (le, __name__, method))",
+          "legendFormat": "{{__name__}} • {{method}} • p95",
+          "interval": ""
+        },
+        {
+          "refId": "C",
+          "expr": "histogram_quantile(0.99, sum(rate({__name__=~\"(${svc:regex})_rest_latency_seconds_bucket\", method=~\"$method\"}[$__rate_interval])) by (le, __name__, method))",
+          "legendFormat": "{{__name__}} • {{method}} • p99",
+          "interval": ""
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Service REST latency max (s) (sanity/outliers)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "max_over_time({__name__=~\"(${svc:regex})_rest_latency_seconds_max\", method=~\"$method\"}[5m])",
+          "legendFormat": "{{__name__}} • {{method}} • max(5m)",
+          "interval": ""
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "K6 HTTP timing breakdown p99 (s)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 45
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "avg(k6_http_req_blocked_p99{communication_pattern=\"rest\", test_run=~\"$test_run\", service=~\"$k6_service\"})",
+          "legendFormat": "blocked",
+          "interval": ""
+        },
+        {
+          "refId": "B",
+          "expr": "avg(k6_http_req_connecting_p99{communication_pattern=\"rest\", test_run=~\"$test_run\", service=~\"$k6_service\"})",
+          "legendFormat": "connecting",
+          "interval": ""
+        },
+        {
+          "refId": "C",
+          "expr": "avg(k6_http_req_tls_handshaking_p99{communication_pattern=\"rest\", test_run=~\"$test_run\", service=~\"$k6_service\"})",
+          "legendFormat": "tls",
+          "interval": ""
+        },
+        {
+          "refId": "D",
+          "expr": "avg(k6_http_req_sending_p99{communication_pattern=\"rest\", test_run=~\"$test_run\", service=~\"$k6_service\"})",
+          "legendFormat": "sending",
+          "interval": ""
+        },
+        {
+          "refId": "E",
+          "expr": "avg(k6_http_req_waiting_p99{communication_pattern=\"rest\", test_run=~\"$test_run\", service=~\"$k6_service\"})",
+          "legendFormat": "waiting",
+          "interval": ""
+        },
+        {
+          "refId": "F",
+          "expr": "avg(k6_http_req_receiving_p99{communication_pattern=\"rest\", test_run=~\"$test_run\", service=~\"$k6_service\"})",
+          "legendFormat": "receiving",
+          "interval": ""
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Service REST failures (req/s) derived from outcome",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 55
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(sum(rate({__name__=~\"(${svc:regex})_rest_requests_total\", method=~\"$method\"}[$__rate_interval])) by (__name__, method)) - (sum(rate({__name__=~\"(${svc:regex})_rest_requests_total\", method=~\"$method\", outcome=\"success\"}[$__rate_interval])) by (__name__, method))",
+          "legendFormat": "{{__name__}} • {{method}} • fail/s"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Service REST failure ratio derived from outcome",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 55
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "1 - ((sum(rate({__name__=~\"(${svc:regex})_rest_requests_total\", method=~\"$method\", outcome=\"success\"}[$__rate_interval])) by (__name__, method)) / ((sum(rate({__name__=~\"(${svc:regex})_rest_requests_total\", method=~\"$method\"}[$__rate_interval])) by (__name__, method)) + 1e-9))",
+          "legendFormat": "{{__name__}} • {{method}} • fail_ratio"
+        }
+      ]
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": [
+    "masterarbeit",
+    "evaluation",
+    "communication-pattern",
+    "rest"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "test_run",
+        "label": "Test run",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PROMETHEUS_DS"
+        },
+        "refresh": 2,
+        "hide": 0,
+        "multi": false,
+        "includeAll": false,
+        "definition": "label_values(k6_http_reqs_total{communication_pattern=\"rest\"}, test_run)",
+        "query": {
+          "query": "label_values(k6_http_reqs_total{communication_pattern=\"rest\"}, test_run)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "sort": 2
+      },
+      {
+        "name": "k6_service",
+        "label": "K6 service",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PROMETHEUS_DS"
+        },
+        "refresh": 2,
+        "hide": 0,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "definition": "label_values(k6_http_reqs_total{communication_pattern=\"rest\", test_run=~\"$test_run\"}, service)",
+        "query": {
+          "query": "label_values(k6_http_reqs_total{communication_pattern=\"rest\", test_run=~\"$test_run\"}, service)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "sort": 1
+      },
+      {
+        "name": "svc",
+        "label": "Service metrics prefix",
+        "type": "custom",
+        "hide": 0,
+        "multi": true,
+        "includeAll": true,
+        "allValue": "claims|customers|policies",
+        "options": [
+          {
+            "selected": true,
+            "text": "claims",
+            "value": "claims"
+          },
+          {
+            "selected": false,
+            "text": "customers",
+            "value": "customers"
+          },
+          {
+            "selected": false,
+            "text": "policies",
+            "value": "policies"
+          }
+        ],
+        "query": "claims,customers,policies",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        }
+      },
+      {
+        "name": "method",
+        "label": "Method/operation (service metrics)",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PROMETHEUS_DS"
+        },
+        "refresh": 2,
+        "hide": 0,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "definition": "label_values({__name__=~\"(${svc:regex})_rest_requests_total\"}, method)",
+        "query": {
+          "query": "label_values({__name__=~\"(${svc:regex})_rest_requests_total\"}, method)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "sort": 1
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h"
+    ]
+  },
+  "timezone": "browser",
+  "title": "CP01 – REST (sync)",
+  "uid": "cp01-rest-sync",
+  "version": 1
+}

@@ -1,0 +1,82 @@
+@startuml
+title Schichten- und Paketstruktur des Claim-Service (vereinfacht)
+
+skinparam packageStyle rectangle
+skinparam rectangle {
+  BackgroundColor White
+  BorderColor Black
+  RoundCorner 10
+}
+
+package "com.example.claims" {
+
+  package "domain" {
+    class Claim
+    enum ClaimStatus
+  }
+
+  package "application" {
+    interface ClaimService
+    class ClaimServiceImpl
+  }
+
+  package "api" {
+    package "dto" {
+      class ClaimCreateRequest
+      class ClaimResponse
+    }
+    package "mapper" {
+      class ClaimDtoMapper
+    }
+  }
+
+  package "infrastructure.rest" {
+    class ClaimRestController
+  }
+
+  package "infrastructure.grpc" {
+    class ClaimsGrpcService
+  }
+
+  package "infrastructure.persistence" {
+    class ClaimEntity
+    interface ClaimJpaRepository
+  }
+
+  package "infrastructure.customer" {
+    interface CustomerClient
+  }
+
+  package "infrastructure.policy" {
+    interface PolicyClient
+  }
+
+  package "infrastructure.messaging" {
+    class ClaimEventsProducer
+  }
+
+  package "support.error" {
+    class ClaimNotFoundException
+  }
+}
+
+' Beziehungen zwischen Schichten (grob)
+
+ClaimServiceImpl --> Claim : nutzt
+ClaimServiceImpl --> ClaimJpaRepository : nutzt
+ClaimServiceImpl --> CustomerClient : ruft an
+ClaimServiceImpl --> PolicyClient : ruft an
+ClaimServiceImpl --> ClaimEventsProducer : publiziert Events
+
+ClaimRestController --> ClaimServiceImpl : ruft Use-Cases auf
+ClaimsGrpcService --> ClaimServiceImpl : ruft Use-Cases auf
+
+ClaimDtoMapper --> Claim
+ClaimDtoMapper --> ClaimCreateRequest
+ClaimDtoMapper --> ClaimResponse
+
+ClaimJpaRepository --> ClaimEntity
+
+ClaimNotFoundException <- ClaimServiceImpl
+
+@enduml
