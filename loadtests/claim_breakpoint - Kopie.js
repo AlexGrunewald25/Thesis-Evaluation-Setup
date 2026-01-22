@@ -5,17 +5,16 @@ import exec from 'k6/execution';
 import { Trend, Rate } from 'k6/metrics';
 
 /**
- * Breakpoint test (drop-in replacement)
+ * Drop-in replacement for claim_breakpoint.js
  *
- * Improvements:
- * - Higher default ramp to reach saturation (override via BP_STAGES)
- * - abortOnFail thresholds to stop at the first clear degradation point
- * - includes dropped_iterations guard to avoid "generator-limited" results
- * - still comparable across REST / gRPC / event-driven (submit_ms + fail-rate)
+ * Goals:
+ * - Comparable metrics across REST / gRPC / event-driven runs
+ * - Reuse gRPC connection per VU (no connect/close per iteration)
+ * - Parameterizable warmup + ramp stages via env vars
  */
 
 // -----------------------------------------------------------------------------
-// Env / defaults
+// Env / defaults (compatible with run-loadtest.sh)
 // -----------------------------------------------------------------------------
 
 const PATTERN = __ENV.PATTERN || 'rest'; // rest | grpc | event-driven
@@ -25,32 +24,25 @@ const TEST_RUN = __ENV.TEST_RUN || 'local-breakpoint';
 
 const CAPTURE_IDS = (__ENV.CAPTURE_IDS || '0') === '1';
 
-// Warmup (keep mild defaults; override via env)
+// Warmup defaults (match your previous file)
 const WARMUP_RATE = __ENV.WARMUP_RATE ? parseInt(__ENV.WARMUP_RATE, 10) : 20;
-const WARMUP_DURATION = __ENV.WARMUP_DURATION || '3m';
-const WARMUP_VUS = __ENV.WARMUP_VUS ? parseInt(__ENV.WARMUP_VUS, 10) : 50;
-const WARMUP_MAX_VUS = __ENV.WARMUP_MAX_VUS ? parseInt(__ENV.WARMUP_MAX_VUS, 10) : 200;
+const WARMUP_DURATION = __ENV.WARMUP_DURATION || '5m';
+const WARMUP_VUS = __ENV.WARMUP_VUS ? parseInt(__ENV.WARMUP_VUS, 10) : 20;
+const WARMUP_MAX_VUS = __ENV.WARMUP_MAX_VUS ? parseInt(__ENV.WARMUP_MAX_VUS, 10) : 50;
 
-// Breakpoint: defaults intentionally higher to make a "knick" likely
-const BP_START_RATE = __ENV.BP_START_RATE ? parseInt(__ENV.BP_START_RATE, 10) : 50;
+// Breakpoint defaults (match your previous file)
+const BP_START_RATE = __ENV.BP_START_RATE ? parseInt(__ENV.BP_START_RATE, 10) : 20;
 const BP_TIME_UNIT = __ENV.BP_TIME_UNIT || '1s';
-const BP_PREALLOC_VUS = __ENV.BP_PREALLOC_VUS ? parseInt(__ENV.BP_PREALLOC_VUS, 10) : 200;
-const BP_MAX_VUS = __ENV.BP_MAX_VUS ? parseInt(__ENV.BP_MAX_VUS, 10) : 2000;
-
-// Example env: BP_STAGES="100:2m,200:2m,400:2m,800:2m,1200:2m,1600:2m,2000:2m"
+const BP_PREALLOC_VUS = __ENV.BP_PREALLOC_VUS ? parseInt(__ENV.BP_PREALLOC_VUS, 10) : 50;
+const BP_MAX_VUS = __ENV.BP_MAX_VUS ? parseInt(__ENV.BP_MAX_VUS, 10) : 200;
 const BP_STAGES = parseStages(__ENV.BP_STAGES) || [
-  { target: 100, duration: '2m' },
-  { target: 200, duration: '2m' },
-  { target: 400, duration: '2m' },
-  { target: 800, duration: '2m' },
-  { target: 1200, duration: '2m' },
-  { target: 1600, duration: '2m' },
-  { target: 2000, duration: '2m' },
+  { target: 20, duration: '5m' },
+  { target: 40, duration: '5m' },
+  { target: 60, duration: '5m' },
+  { target: 80, duration: '5m' },
+  { target: 100, duration: '5m' },
+  { target: 120, duration: '5m' },
 ];
-
-// Threshold behavior
-const ABORT_ON_FAIL = (__ENV.ABORT_ON_FAIL || '1') === '1';
-const DELAY_ABORT_EVAL = __ENV.DELAY_ABORT_EVAL || '30s';
 
 // Test data pools (defaults reflect your seed data.sql)
 const POLICY_IDS = parseCsvOrDefault(__ENV.POLICY_IDS, [
@@ -66,14 +58,14 @@ const CUSTOMER_IDS = parseCsvOrDefault(__ENV.CUSTOMER_IDS, [
 const isGrpc = PATTERN === 'grpc';
 
 // -----------------------------------------------------------------------------
-// Metrics
+// Custom metrics (uniform across patterns)
 // -----------------------------------------------------------------------------
 
 const submit_ms = new Trend('submit_ms', true);
 const submit_fail_rate = new Rate('submit_fail_rate');
 
 // -----------------------------------------------------------------------------
-// Options
+// k6 options
 // -----------------------------------------------------------------------------
 
 export const options = {
@@ -110,27 +102,13 @@ export const options = {
   },
 
   thresholds: {
-    submit_ms: [{
-      threshold: 'p(95)<500',
-      abortOnFail: ABORT_ON_FAIL,
-      delayAbortEval: DELAY_ABORT_EVAL,
-    }],
-    submit_fail_rate: [{
-      threshold: 'rate<0.01',
-      abortOnFail: ABORT_ON_FAIL,
-      delayAbortEval: DELAY_ABORT_EVAL,
-    }],
-    // Guard against load-generator limits (if maxVUs too low)
-    dropped_iterations: [{
-      threshold: 'rate<3',
-      abortOnFail: ABORT_ON_FAIL,
-      delayAbortEval: DELAY_ABORT_EVAL,
-    }],
+    submit_ms: ['p(95)<500'],
+    submit_fail_rate: ['rate<0.01'],
   },
 };
 
 // -----------------------------------------------------------------------------
-// gRPC client setup (reuse per VU)
+// gRPC client setup (per-VU runtime; no connect/close per iteration)
 // -----------------------------------------------------------------------------
 
 const grpcClient = new grpc.Client();
@@ -145,16 +123,19 @@ function ensureGrpcConnected() {
 }
 
 // -----------------------------------------------------------------------------
-// Main
+// Main entry point
 // -----------------------------------------------------------------------------
 
 export default function () {
-  if (isGrpc) submitViaGrpc();
-  else submitViaHttp();
+  if (isGrpc) {
+    submitViaGrpc();
+  } else {
+    submitViaHttp();
+  }
 }
 
 // -----------------------------------------------------------------------------
-// Helpers
+// Helpers: payload selection / IDs
 // -----------------------------------------------------------------------------
 
 function pickFrom(arr) {
@@ -178,11 +159,16 @@ function buildCreatePayload() {
 
 function parseCsvOrDefault(value, fallbackArr) {
   if (!value || value.trim() === '') return fallbackArr;
-  return value.split(',').map((s) => s.trim()).filter((s) => s.length > 0);
+  return value
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
 }
 
+// Example: BP_STAGES="20:5m,40:5m,60:5m,80:5m,100:5m,120:5m"
 function parseStages(value) {
   if (!value || value.trim() === '') return null;
+
   const stages = [];
   for (const part of value.split(',')) {
     const p = part.trim();
@@ -196,12 +182,14 @@ function parseStages(value) {
 }
 
 // -----------------------------------------------------------------------------
-// HTTP
+// REST / event-driven over HTTP
 // -----------------------------------------------------------------------------
 
 function submitViaHttp() {
   const url = `${BASE_URL}/claims`;
-  const payload = JSON.stringify(buildCreatePayload());
+
+  const payloadObj = buildCreatePayload();
+  const payload = JSON.stringify(payloadObj);
 
   const params = {
     headers: { 'Content-Type': 'application/json' },
@@ -214,7 +202,7 @@ function submitViaHttp() {
   submit_ms.add(Date.now() - start);
 
   const ok = check(res, {
-    'submit: HTTP status is 2xx': (r) => r.status >= 200 && r.status < 300,
+    'submit: HTTP status is 201/2xx': (r) => r.status >= 200 && r.status < 300,
   });
 
   submit_fail_rate.add(!ok);
@@ -236,10 +224,14 @@ function submitViaGrpc() {
   };
 
   const start = Date.now();
-  const response = grpcClient.invoke('claims.ClaimsService/SubmitClaim', request, {
-    tags: { operation: 'submitClaim', protocol: 'grpc' },
-    timeout: '30s',
-  });
+  const response = grpcClient.invoke(
+    'claims.ClaimsService/SubmitClaim',
+    request,
+    {
+      tags: { operation: 'submitClaim', protocol: 'grpc' },
+      timeout: '30s',
+    },
+  );
   submit_ms.add(Date.now() - start);
 
   const ok = check(response, {
@@ -251,11 +243,21 @@ function submitViaGrpc() {
     tryReconnectGrpc();
     return;
   }
+
   submit_fail_rate.add(false);
 }
 
 function tryReconnectGrpc() {
-  try { grpcClient.close(); } catch (_) {}
+  try {
+    grpcClient.close();
+  } catch (_) {
+    // ignore
+  }
   grpcConnected = false;
-  try { ensureGrpcConnected(); } catch (_) {}
+
+  try {
+    ensureGrpcConnected();
+  } catch (_) {
+    // ignore
+  }
 }
