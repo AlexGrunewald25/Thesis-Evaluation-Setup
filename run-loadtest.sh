@@ -127,7 +127,7 @@ export_resources() {
     echo "{"
     local first=1
 
-    # ID NAME (NAME ist bei dir z.B. claims-kafka oder claim-service)
+    # ID NAME
     while read -r cid name; do
       [[ -z "${cid:-}" || -z "${name:-}" ]] && continue
 
