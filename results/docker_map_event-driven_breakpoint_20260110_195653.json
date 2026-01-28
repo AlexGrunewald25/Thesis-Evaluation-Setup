@@ -1,0 +1,12 @@
+{
+  "a34583319ed4": {"name":"claim-service","service":"claim-service"},
+  "6f5a12d4a72f": {"name":"policy-service","service":"policy-service"},
+  "7755d4b0b176": {"name":"customer-service","service":"customer-service"},
+  "9567946ca975": {"name":"claims-kafka","service":"kafka"},
+  "bba421ecacbe": {"name":"claims-grafana","service":"grafana"},
+  "e88f3feb45d8": {"name":"claims-postgres","service":"postgres"},
+  "e65aed169273": {"name":"claims-prometheus","service":"prometheus"},
+  "2ae753853dc9": {"name":"claims-zookeeper","service":"zookeeper"},
+  "e22d082cb9f3": {"name":"claims-node-exporter","service":"node-exporter"},
+  "35dfd2d0d070": {"name":"claims-cadvisor","service":"cadvisor"}
+}

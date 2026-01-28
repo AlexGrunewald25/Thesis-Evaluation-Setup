@@ -1,0 +1,88 @@
+{
+    "root_group": {
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "submit: gRPC status is OK": {
+                    "id": "8e8c8b757828225acd553bb0c67357dc",
+                    "passes": 128278,
+                    "fails": 0,
+                    "name": "submit: gRPC status is OK",
+                    "path": "::submit: gRPC status is OK"
+                }
+            },
+        "name": "",
+        "path": ""
+    },
+    "metrics": {
+        "vus": {
+            "value": 661,
+            "min": 0,
+            "max": 661
+        },
+        "vus_max": {
+            "value": 713,
+            "min": 250,
+            "max": 713
+        },
+        "grpc_req_duration": {
+            "avg": 49.91433876619558,
+            "min": 4.130269,
+            "med": 6.317839,
+            "max": 1622.141704,
+            "p(90)": 187.7373934000001,
+            "p(95)": 290.81902834999994
+        },
+        "iterations": {
+            "count": 128278,
+            "rate": 419.2069475203242
+        },
+        "data_sent": {
+            "count": 28515235,
+            "rate": 93186.55281634195
+        },
+        "data_received": {
+            "count": 36191646,
+            "rate": 118272.7314535318
+        },
+        "iteration_duration": {
+            "p(90)": 187.9812559,
+            "p(95)": 291.20877905,
+            "avg": 50.24867918707797,
+            "min": 4.381298,
+            "med": 6.674497000000001,
+            "max": 1622.600737
+        },
+        "submit_ms": {
+            "min": 4,
+            "med": 7,
+            "max": 1623,
+            "p(90)": 188,
+            "p(95)": 291,
+            "avg": 50.07532078766429,
+            "thresholds": {
+                "p(95)<500": false
+            }
+        },
+        "dropped_iterations": {
+            "count": 961,
+            "rate": 3.1405063734002057,
+            "thresholds": {
+                "rate<3": true
+            }
+        },
+        "checks": {
+            "passes": 128278,
+            "fails": 0,
+            "value": 1
+        },
+        "submit_fail_rate": {
+            "passes": 0,
+            "fails": 128278,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        }
+    }
+}

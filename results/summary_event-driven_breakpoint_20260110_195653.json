@@ -1,0 +1,153 @@
+{
+    "root_group": {
+        "checks": {
+            "submit: HTTP status is 2xx": {
+                "id": "ed691a31efcb778b807713d4c91aa0f7",
+                "passes": 248560,
+                "fails": 0,
+                "name": "submit: HTTP status is 2xx",
+                "path": "::submit: HTTP status is 2xx"
+            }
+        },
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {}
+    },
+    "metrics": {
+        "submit_fail_rate": {
+            "passes": 0,
+            "fails": 248560,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "http_req_duration": {
+            "med": 6.959076,
+            "max": 962.911674,
+            "p(90)": 143.8050292,
+            "p(95)": 251.52339325,
+            "avg": 40.373651526142766,
+            "min": 1.176298
+        },
+        "submit_ms": {
+            "avg": 40.48734309623431,
+            "min": 1,
+            "med": 7,
+            "max": 963,
+            "p(90)": 144,
+            "p(95)": 252,
+            "thresholds": {
+                "p(95)<500": false
+            }
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 248560,
+            "value": 0
+        },
+        "http_req_duration{expected_response:true}": {
+            "p(95)": 251.52339325,
+            "avg": 40.373651526142766,
+            "min": 1.176298,
+            "med": 6.959076,
+            "max": 962.911674,
+            "p(90)": 143.8050292
+        },
+        "http_req_connecting": {
+            "avg": 0.0037799280576118455,
+            "min": 0,
+            "med": 0,
+            "max": 37.053062,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "vus_max": {
+            "min": 250,
+            "max": 662,
+            "value": 662
+        },
+        "http_req_tls_handshaking": {
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0
+        },
+        "checks": {
+            "passes": 248560,
+            "fails": 0,
+            "value": 1
+        },
+        "http_req_waiting": {
+            "p(90)": 143.64337890000002,
+            "p(95)": 251.4038424999999,
+            "avg": 40.22162248832446,
+            "min": 1.020511,
+            "med": 6.807201,
+            "max": 962.840648
+        },
+        "data_received": {
+            "count": 143239119,
+            "rate": 370978.3044625953
+        },
+        "iterations": {
+            "rate": 643.7512880627442,
+            "count": 248560
+        },
+        "http_req_receiving": {
+            "med": 0.07204250000000001,
+            "max": 17.118347,
+            "p(90)": 0.21545730000000002,
+            "p(95)": 0.321775,
+            "avg": 0.10894967869327495,
+            "min": -1.164357
+        },
+        "data_sent": {
+            "count": 90278101,
+            "rate": 233813.34004911696
+        },
+        "dropped_iterations": {
+            "count": 1207,
+            "rate": 3.126037192998601,
+            "thresholds": {
+                "rate<3": true
+            }
+        },
+        "http_req_blocked": {
+            "avg": 0.011177358207274357,
+            "min": 0.001613,
+            "med": 0.005862,
+            "max": 37.137774,
+            "p(90)": 0.007965,
+            "p(95)": 0.008917
+        },
+        "http_reqs": {
+            "rate": 643.7512880627442,
+            "count": 248560
+        },
+        "iteration_duration": {
+            "avg": 40.69063286103113,
+            "min": 2.48734,
+            "med": 7.260567,
+            "max": 964.905485,
+            "p(90)": 144.05577930000013,
+            "p(95)": 251.84043505
+        },
+        "http_req_sending": {
+            "med": 0.04186,
+            "max": 10.535006,
+            "p(90)": 0.05974040000000003,
+            "p(95)": 0.06774,
+            "avg": 0.04307935912455826,
+            "min": 0.006322
+        },
+        "vus": {
+            "value": 607,
+            "min": 0,
+            "max": 607
+        }
+    }
+}

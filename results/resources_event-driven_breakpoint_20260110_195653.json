@@ -1,0 +1,335 @@
+{
+  "test_run": "event-driven_breakpoint_20260110_195653",
+  "start_epoch": 1768071413,
+  "end_epoch": 1768071802,
+  "step": "10s",
+  "prometheus": {
+    "url": "http://localhost:9091",
+    "job": "cadvisor",
+    "queries": {
+      "cpu": "sum by (id) (rate(container_cpu_usage_seconds_total{job=\"cadvisor\",cpu=\"total\",id=~\"/docker/[0-9a-f]{12,64}\"}[1m]))",
+      "mem": "max by (id) (container_memory_working_set_bytes{job=\"cadvisor\",id=~\"/docker/[0-9a-f]{12,64}\"})"
+    }
+  },
+  "labeling": {
+    "series_label_key": "id",
+    "cgroup_pattern": "/docker/<container-id>",
+    "grouping": "service (from docker ps map) -> name -> docker id"
+  },
+  "containers": {
+    "055333a2c913": {
+      "docker_id": "055333a2c913",
+      "cgroup_id": "/docker/055333a2c913b4da3bf3369f25e8fb2c1bfcbeb32e2f0d2051d82cd5b3bed8aa",
+      "name": null,
+      "service": null,
+      "cpu_cores": {
+        "avg": 0.4628596205751892,
+        "p95": 1.0493502243646304,
+        "max": 1.1002360576835424
+      },
+      "mem_bytes": {
+        "avg": 166814019.36842105,
+        "p95": 255528550.39999998,
+        "max": 293171200.0
+      }
+    },
+    "2ae753853dc9": {
+      "docker_id": "2ae753853dc9",
+      "cgroup_id": "/docker/2ae753853dc91239d7ce8dc65308271bb0291bfdf454cb2e87ae401aa8ae64db",
+      "name": "claims-zookeeper",
+      "service": "zookeeper",
+      "cpu_cores": {
+        "avg": 0.0016225051680384195,
+        "p95": 0.0017414742814974723,
+        "max": 0.0017810774620760504
+      },
+      "mem_bytes": {
+        "avg": 149268742.56410256,
+        "p95": 149274624.0,
+        "max": 149274624.0
+      }
+    },
+    "35dfd2d0d070": {
+      "docker_id": "35dfd2d0d070",
+      "cgroup_id": "/docker/35dfd2d0d0706c1284a50d94b6a65e7cbafd20870f557701bf7d0ba659fcdc61",
+      "name": "claims-cadvisor",
+      "service": "cadvisor",
+      "cpu_cores": {
+        "avg": 0.016358657828525455,
+        "p95": 0.019121298816107753,
+        "max": 0.01967997056870614
+      },
+      "mem_bytes": {
+        "avg": 45718186.666666664,
+        "p95": 49056563.199999996,
+        "max": 50196480.0
+      }
+    },
+    "5ab897ddbcc6": {
+      "docker_id": "5ab897ddbcc6",
+      "cgroup_id": "/docker/5ab897ddbcc6db1e8b3a1ae29f66513e4dcc78ec0b79f484025eef6b1243d573",
+      "name": null,
+      "service": null,
+      "cpu_cores": {
+        "avg": 0.30343605760495923,
+        "p95": 0.377823790160332,
+        "max": 0.3860890937775957
+      },
+      "mem_bytes": {
+        "avg": 398290944.0,
+        "p95": 398290944.0,
+        "max": 398290944.0
+      }
+    },
+    "6f5a12d4a72f": {
+      "docker_id": "6f5a12d4a72f",
+      "cgroup_id": "/docker/6f5a12d4a72f4a7ca87b8346f3952db45620d4d6bd855826d90554e72766d4f1",
+      "name": "policy-service",
+      "service": "policy-service",
+      "cpu_cores": {
+        "avg": 0.5393571418448463,
+        "p95": 0.7132562310221952,
+        "max": 0.7201302791173462
+      },
+      "mem_bytes": {
+        "avg": 580440589.1282052,
+        "p95": 638720819.2,
+        "max": 639492096.0
+      }
+    },
+    "7755d4b0b176": {
+      "docker_id": "7755d4b0b176",
+      "cgroup_id": "/docker/7755d4b0b17641ba10fccbec32f63665e2363db29b68b8bad3dee62da4d1c4dd",
+      "name": "customer-service",
+      "service": "customer-service",
+      "cpu_cores": {
+        "avg": 0.515039397688117,
+        "p95": 0.697857059542977,
+        "max": 0.7014048911050816
+      },
+      "mem_bytes": {
+        "avg": 581406720.0,
+        "p95": 640961740.8,
+        "max": 641699840.0
+      }
+    },
+    "9567946ca975": {
+      "docker_id": "9567946ca975",
+      "cgroup_id": "/docker/9567946ca97574cf8eb772dd5d4ee6c7ee1c834638d9d421421ccb1e355ca3a7",
+      "name": "claims-kafka",
+      "service": "kafka",
+      "cpu_cores": {
+        "avg": 0.6643961703575483,
+        "p95": 1.3223558461497449,
+        "max": 1.3515244541403293
+      },
+      "mem_bytes": {
+        "avg": 1340309819.0769231,
+        "p95": 1481240576.0,
+        "max": 1501294592.0
+      }
+    },
+    "a34583319ed4": {
+      "docker_id": "a34583319ed4",
+      "cgroup_id": "/docker/a34583319ed485b0c4b352e97363e3c3576b0d4962d8d3b421bfa0532bc6bc9d",
+      "name": "claim-service",
+      "service": "claim-service",
+      "cpu_cores": {
+        "avg": 1.4798431085288206,
+        "p95": 2.8560965773023548,
+        "max": 2.874935207379967
+      },
+      "mem_bytes": {
+        "avg": 675578171.0769231,
+        "p95": 824650956.8,
+        "max": 825073664.0
+      }
+    },
+    "bba421ecacbe": {
+      "docker_id": "bba421ecacbe",
+      "cgroup_id": "/docker/bba421ecacbebb90dde6acc432eb2ae33df8778dc84a4c4881e932df687be756",
+      "name": "claims-grafana",
+      "service": "grafana",
+      "cpu_cores": {
+        "avg": 0.0046224889904740215,
+        "p95": 0.0056084935434788635,
+        "max": 0.005693846040732397
+      },
+      "mem_bytes": {
+        "avg": 98513001.02564102,
+        "p95": 98578841.60000001,
+        "max": 98582528.0
+      }
+    },
+    "e22d082cb9f3": {
+      "docker_id": "e22d082cb9f3",
+      "cgroup_id": "/docker/e22d082cb9f3fe29ad991244d196d3564d464e7457d34ce06d08e605d66ba510",
+      "name": "claims-node-exporter",
+      "service": "node-exporter",
+      "cpu_cores": {
+        "avg": 0.003324309891580868,
+        "p95": 0.004176618396262884,
+        "max": 0.004402372182372515
+      },
+      "mem_bytes": {
+        "avg": 9998230.974358974,
+        "p95": 10401792.0,
+        "max": 10485760.0
+      }
+    },
+    "e2cb6e7ba759": {
+      "docker_id": "e2cb6e7ba759",
+      "cgroup_id": "/docker/e2cb6e7ba7590dfff0252db25d960febc563df774a5e1299ef6af0741975c8f9",
+      "name": null,
+      "service": null,
+      "cpu_cores": {
+        "avg": 0.19442643644083918,
+        "p95": 0.2609272154992252,
+        "max": 0.268316190950157
+      },
+      "mem_bytes": {
+        "avg": 563765248.0,
+        "p95": 563765248.0,
+        "max": 563765248.0
+      }
+    },
+    "e65aed169273": {
+      "docker_id": "e65aed169273",
+      "cgroup_id": "/docker/e65aed169273a54cab9c0b8ce5a7a356bd7c5f19d28734a487ee6ddf10b9bbc3",
+      "name": "claims-prometheus",
+      "service": "prometheus",
+      "cpu_cores": {
+        "avg": 0.006988147429349651,
+        "p95": 0.019610942245739095,
+        "max": 0.0198308911320961
+      },
+      "mem_bytes": {
+        "avg": 110622352.41025642,
+        "p95": 140292096.0,
+        "max": 140296192.0
+      }
+    },
+    "e88f3feb45d8": {
+      "docker_id": "e88f3feb45d8",
+      "cgroup_id": "/docker/e88f3feb45d812c5676354f7f4b634d02f70e2c0cc3ffb70d1f5725551094c49",
+      "name": "claims-postgres",
+      "service": "postgres",
+      "cpu_cores": {
+        "avg": 0.8574043344951773,
+        "p95": 2.0017644306625946,
+        "max": 2.0240889760270884
+      },
+      "mem_bytes": {
+        "avg": 462041613.1282051,
+        "p95": 498438963.2,
+        "max": 499040256.0
+      }
+    },
+    "ef370305bb76": {
+      "docker_id": "ef370305bb76",
+      "cgroup_id": "/docker/ef370305bb767ac328ea721e967b36d5ac0648a6fff19727186daa3f5270ff8f",
+      "name": null,
+      "service": null,
+      "cpu_cores": {
+        "avg": 0.6152211296518908,
+        "p95": 0.7844230929365671,
+        "max": 0.803223311079309
+      },
+      "mem_bytes": {
+        "avg": 873213952.0,
+        "p95": 873213952.0,
+        "max": 873213952.0
+      }
+    },
+    "f84bf21a27d5": {
+      "docker_id": "f84bf21a27d5",
+      "cgroup_id": "/docker/f84bf21a27d513c1c0679ab7e02602d47922462360f895b2bb96f78ff7a6bb56",
+      "name": null,
+      "service": null,
+      "cpu_cores": {
+        "avg": 0.18182249624956656,
+        "p95": 0.2502634202113892,
+        "max": 0.2578679673182584
+      },
+      "mem_bytes": {
+        "avg": 579915776.0,
+        "p95": 579915776.0,
+        "max": 579915776.0
+      }
+    }
+  },
+  "groups": {
+    "claim-service": {
+      "cpu_cores": {
+        "avg": 1.4798431085288206,
+        "p95": 2.8560965773023548,
+        "max": 2.874935207379967
+      },
+      "mem_bytes": {
+        "avg": 675578171.0769231,
+        "p95": 824650956.8,
+        "max": 825073664.0
+      }
+    },
+    "customer-service": {
+      "cpu_cores": {
+        "avg": 0.515039397688117,
+        "p95": 0.697857059542977,
+        "max": 0.7014048911050816
+      },
+      "mem_bytes": {
+        "avg": 581406720.0,
+        "p95": 640961740.8,
+        "max": 641699840.0
+      }
+    },
+    "kafka": {
+      "cpu_cores": {
+        "avg": 0.6643961703575483,
+        "p95": 1.3223558461497449,
+        "max": 1.3515244541403293
+      },
+      "mem_bytes": {
+        "avg": 1340309819.0769231,
+        "p95": 1481240576.0,
+        "max": 1501294592.0
+      }
+    },
+    "policy-service": {
+      "cpu_cores": {
+        "avg": 0.5393571418448463,
+        "p95": 0.7132562310221952,
+        "max": 0.7201302791173462
+      },
+      "mem_bytes": {
+        "avg": 580440589.1282052,
+        "p95": 638720819.2,
+        "max": 639492096.0
+      }
+    },
+    "postgres": {
+      "cpu_cores": {
+        "avg": 0.8574043344951773,
+        "p95": 2.0017644306625946,
+        "max": 2.0240889760270884
+      },
+      "mem_bytes": {
+        "avg": 462041613.1282051,
+        "p95": 498438963.2,
+        "max": 499040256.0
+      }
+    },
+    "zookeeper": {
+      "cpu_cores": {
+        "avg": 0.0016225051680384195,
+        "p95": 0.0017414742814974723,
+        "max": 0.0017810774620760504
+      },
+      "mem_bytes": {
+        "avg": 149268742.56410256,
+        "p95": 149274624.0,
+        "max": 149274624.0
+      }
+    }
+  }
+}

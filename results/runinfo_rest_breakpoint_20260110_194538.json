@@ -1,0 +1,33 @@
+{
+  "test_run": "rest_breakpoint_20260110_194538",
+  "pattern": "rest",
+  "test_kind": "breakpoint",
+  "base_url": "http://claim-service:8080",
+  "grpc_target": "claim-service:9090",
+  "k6_prom_rw_url": "http://prometheus:9090/api/v1/write",
+  "prom_export_url": "http://localhost:9091",
+  "service_regex": "claim-service|policy-service|customer-service|postgres|kafka|zookeeper",
+  "params": {
+    "RATE": "",
+    "DURATION": "",
+    "VUS": "",
+    "MAX_VUS": "",
+
+    "WARMUP_RATE": "20",
+    "WARMUP_DURATION": "1m",
+    "WARMUP_VUS": "50",
+    "WARMUP_MAX_VUS": "200",
+
+    "BP_START_RATE": "50",
+    "BP_TIME_UNIT": "",
+    "BP_PREALLOC_VUS": "200",
+    "BP_MAX_VUS": "2000",
+    "BP_STAGES": "200:1m,400:1m,800:1m,1200:1m,1600:1m,2000:1m,2500:1m",
+
+    "ABORT_ON_FAIL": "1",
+    "DELAY_ABORT_EVAL": "20s",
+
+    "E2E_TIMEOUT_MS": "",
+    "E2E_POLL_INTERVAL_MS": ""
+  }
+}
